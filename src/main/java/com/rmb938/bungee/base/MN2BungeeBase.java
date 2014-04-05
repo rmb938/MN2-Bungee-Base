@@ -10,6 +10,7 @@ import com.rmb938.bungee.base.listeners.PlayerListener;
 import com.rmb938.database.DatabaseAPI;
 import com.rmb938.jedis.JedisManager;
 import net.cubespace.Yamler.Config.InvalidConfigurationException;
+import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.concurrent.TimeUnit;
@@ -19,6 +20,7 @@ public class MN2BungeeBase extends Plugin {
 
     private MainConfig mainConfig;
     private boolean maintenance;
+    private String IP;
 
     @Override
     public void onEnable() {
@@ -29,6 +31,18 @@ public class MN2BungeeBase extends Plugin {
         } catch (InvalidConfigurationException e) {
             getLogger().log(Level.SEVERE, null ,e);
             return;
+        }
+
+        for (ListenerInfo listenerInfo : getProxy().getConfig().getListeners()) {
+            if (listenerInfo.getMaxPlayers() == 0) {
+                IP = listenerInfo.getHost().getAddress().getHostAddress();
+                break;
+            }
+        }
+
+        if (IP == null) {
+            getLogger().severe("Error starting server. Unknown internal IP address.");
+            getProxy().stop();
         }
 
         DatabaseAPI.initializeMySQL(mainConfig.mySQL_userName, mainConfig.mySQL_password, mainConfig.mySQL_database, mainConfig.mySQL_address, mainConfig.mySQL_port);
@@ -59,6 +73,10 @@ public class MN2BungeeBase extends Plugin {
     @Override
     public void onDisable() {
         JedisManager.shutDown();
+    }
+
+    public String getIP() {
+        return IP;
     }
 
     public boolean isMaintenance() {

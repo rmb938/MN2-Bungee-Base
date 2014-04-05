@@ -25,7 +25,9 @@ public class NetCommandHandlerSCTB extends NetCommandHandler {
             String toBungee = jsonObject.getString("to");
 
             if (toBungee.equalsIgnoreCase("*") == false) {
-
+                if (toBungee.equalsIgnoreCase(plugin.getIP()) == false) {
+                    return;
+                }
             }
 
             String command = jsonObject.getString("command");

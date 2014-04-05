@@ -2,6 +2,7 @@ package com.rmb938.bungee.base.entity;
 
 import net.md_5.bungee.api.config.ServerInfo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ExtendedServerInfo {
@@ -12,13 +13,29 @@ public class ExtendedServerInfo {
         return extendedInfos;
     }
 
+    public static ArrayList<ExtendedServerInfo> getExtendedInfos(String serverName) {
+        ArrayList<ExtendedServerInfo> exSI = new ArrayList<>();
+        for (ExtendedServerInfo extendedServerInfo : extendedInfos.values()) {
+            if (extendedServerInfo.getServerName().equalsIgnoreCase(serverName)) {
+                exSI.add(extendedServerInfo);
+            }
+        }
+        return exSI;
+    }
+
     private final ServerInfo serverInfo;
     private final int maxPlayers;
+    private final String serverName;
     private int currentPlayers = 0;
 
-    public ExtendedServerInfo(ServerInfo serverInfo, int maxPlayers) {
+    public ExtendedServerInfo(ServerInfo serverInfo, int maxPlayers, String serverName) {
         this.serverInfo = serverInfo;
         this.maxPlayers = maxPlayers;
+        this.serverName = serverName;
+    }
+
+    public String getServerName() {
+        return serverName;
     }
 
     public int getFree() {

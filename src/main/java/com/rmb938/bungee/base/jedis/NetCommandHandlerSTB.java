@@ -25,20 +25,21 @@ public class NetCommandHandlerSTB extends NetCommandHandler {
     public void handle(JSONObject jsonObject) {
         try {
             String fromServer = jsonObject.getString("from");
-            String[] serverNameInfo = fromServer.split("\\.");
 
             String command = jsonObject.getString("command");
             HashMap<String, Object> objectHashMap = objectToHashMap(jsonObject.getJSONObject("data"));
             switch (command) {
                 case "updateServer":
+                    String IP = (String) objectHashMap.get("IP");
+                    int port = (Integer) objectHashMap.get("port");
+                    String serverName = (String) objectHashMap.get("serverName");
                     int currentPlayers = (Integer) objectHashMap.get("currentPlayers");
                     int maxPlayers = (Integer) objectHashMap.get("maxPlayers");
                     ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(fromServer);
 
                     if (extendedServerInfo == null) {
-                        ServerInfo serverInfo = plugin.getProxy().constructServerInfo(fromServer, new InetSocketAddress(serverNameInfo[0]+"."+serverNameInfo[1]+"."+serverNameInfo[2]+"."+serverNameInfo[3],
-                                Integer.parseInt(serverNameInfo[5])), "", false);
-                        extendedServerInfo = new ExtendedServerInfo(serverInfo, maxPlayers);
+                        ServerInfo serverInfo = plugin.getProxy().constructServerInfo(fromServer, new InetSocketAddress(IP, port), "", false);
+                        extendedServerInfo = new ExtendedServerInfo(serverInfo, maxPlayers, serverName);
                     }
                     extendedServerInfo.setCurrentPlayers(currentPlayers);
                     break;
