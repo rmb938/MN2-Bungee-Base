@@ -1,0 +1,44 @@
+package com.rmb938.bungee.base.jedis;
+
+import com.rmb938.bungee.base.MN2BungeeBase;
+import com.rmb938.jedis.net.NetChannel;
+import com.rmb938.jedis.net.NetCommandHandler;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.logging.Level;
+
+public class NetCommandHandlerSCTB extends NetCommandHandler {
+
+    private final MN2BungeeBase plugin;
+
+    public NetCommandHandlerSCTB(MN2BungeeBase plugin) {
+        NetCommandHandler.addHandler(NetChannel.SERVER_CONTROLLER_TO_BUNGEE, this);
+        this.plugin = plugin;
+    }
+
+    @Override
+    public void handle(JSONObject jsonObject) {
+        try {
+            String fromServerController = jsonObject.getString("from");
+            String toBungee = jsonObject.getString("to");
+
+            if (toBungee.equalsIgnoreCase("*") == false) {
+
+            }
+
+            String command = jsonObject.getString("command");
+            HashMap<String, Object> objectHashMap = objectToHashMap(jsonObject.getJSONObject("data"));
+            switch (command) {
+                case "shutdown":
+                    plugin.getProxy().stop();
+                    break;
+                default:
+                    plugin.getLogger().info("Unknown SCTB Command MN2BukkitBase " + command);
+            }
+        } catch (JSONException e) {
+            plugin.getLogger().log(Level.SEVERE, null, e);
+        }
+    }
+}
