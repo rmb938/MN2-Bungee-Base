@@ -9,6 +9,7 @@ import com.rmb938.bungee.base.jedis.NetCommandHandlerSTB;
 import com.rmb938.bungee.base.listeners.PlayerListener;
 import com.rmb938.database.DatabaseAPI;
 import com.rmb938.jedis.JedisManager;
+import com.rmb938.jedis.net.command.bungee.NetCommandBTSC;
 import net.cubespace.Yamler.Config.InvalidConfigurationException;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -43,6 +44,8 @@ public class MN2BungeeBase extends Plugin {
         if (IP == null) {
             getLogger().severe("Error starting server. Unknown internal IP address.");
             getProxy().stop();
+        } else {
+            getLogger().info("Internal IP: "+IP);
         }
 
         DatabaseAPI.initializeMySQL(mainConfig.mySQL_userName, mainConfig.mySQL_password, mainConfig.mySQL_database, mainConfig.mySQL_address, mainConfig.mySQL_port);
@@ -66,8 +69,16 @@ public class MN2BungeeBase extends Plugin {
             @Override
             public void run() {
                 maintenance = false;
+                getLogger().info("Removing Maintenance Mode");
             }
         }, 30L, TimeUnit.SECONDS);
+
+        getProxy().getScheduler().schedule(this, new Runnable() {
+            @Override
+            public void run() {
+                sendHeartbeat();
+            }
+        }, 30, 30, TimeUnit.SECONDS);
     }
 
     @Override
@@ -89,5 +100,10 @@ public class MN2BungeeBase extends Plugin {
 
     public MainConfig getMainConfig() {
         return mainConfig;
+    }
+
+    private void sendHeartbeat() {
+        NetCommandBTSC netCommandBTSC = new NetCommandBTSC("heartbeat", IP);
+        netCommandBTSC.flush();
     }
 }

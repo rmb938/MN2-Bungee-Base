@@ -41,9 +41,8 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         Map map = (Map) beansInfo.get(0);
         String server = (String) map.get("server");
         ArrayList<ServerInfo> serverInfos = new ArrayList<>();
-        for (String name : ExtendedServerInfo.getExtendedInfos().keySet()) {
-            if (name.split("\\.")[4].equalsIgnoreCase(server)) {
-                ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(name);
+        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
+            if (extendedServerInfo.getServerName().equalsIgnoreCase(server)) {
                 if (extendedServerInfo.getFree() >= 1) {
                     serverInfos.add(extendedServerInfo.getServerInfo());
                 }

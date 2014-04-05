@@ -5,6 +5,7 @@ import net.cubespace.Yamler.Config.Config;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class MainConfig extends Config {
 
@@ -28,6 +29,9 @@ public class MainConfig extends Config {
     public String mySQL_database = "database";
 
     @Comment("List of server name prefixes to not reconnect to")
-    public String[] serverNames = {"mg"};
+    public ArrayList<String> serverNames = new ArrayList<String>() {{
+        add("mg");
+    }};
+
 
 }
