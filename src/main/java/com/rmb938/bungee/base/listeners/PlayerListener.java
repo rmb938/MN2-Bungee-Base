@@ -19,17 +19,23 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPing(ProxyPingEvent event) {
-        int totalPlayers = 0;
+        int max = 0;
+        int online = 0;
         for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
-            totalPlayers += extendedServerInfo.getCurrentPlayers();
+            max += extendedServerInfo.getMaxPlayers();
+            online += extendedServerInfo.getCurrentPlayers();
         }
-        ServerPing.PlayerInfo[] playerInfos = new ServerPing.PlayerInfo[plugin.getProxy().getConfig().getListeners().iterator().next().getMaxPlayers()];
-        ServerPing.Players players = new ServerPing.Players(plugin.getProxy().getConfig().getListeners().iterator().next().getMaxPlayers(), totalPlayers, playerInfos);
-        event.getResponse().setPlayers(players);
-
+        ServerPing serverPing = new ServerPing();
+        ServerPing.Players players = new ServerPing.Players(max, online, event.getResponse().getPlayers().getSample());
+        serverPing.setPlayers(players);
         if (plugin.isMaintenance()) {
-            event.getResponse().setDescription("Maintenance Mode");
+            serverPing.setDescription("Maintenance Mode");
+        } else {
+            serverPing.setDescription("MN Squared Testing");
         }
+        serverPing.setVersion(event.getResponse().getVersion());
+        event.setResponse(serverPing);
+        plugin.getLogger().info("PINGED");
     }
 
     @EventHandler

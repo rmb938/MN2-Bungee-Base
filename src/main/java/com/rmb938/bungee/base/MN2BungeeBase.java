@@ -57,6 +57,14 @@ public class MN2BungeeBase extends Plugin {
         JedisManager.connectToRedis(mainConfig.redis_address);
         JedisManager.setUpDelegates();
 
+        try {
+            JedisManager.returnJedis(JedisManager.getJedis());
+        } catch (Exception e) {
+            getLogger().warning("Unable to connect to redis. Closing");
+            getProxy().stop();
+            return;
+        }
+
         new NetCommandHandlerBTB(this);
         new NetCommandHandlerSCTB(this);
         new NetCommandHandlerSTB(this);
@@ -78,7 +86,7 @@ public class MN2BungeeBase extends Plugin {
             public void run() {
                 sendHeartbeat();
             }
-        }, 30, 30, TimeUnit.SECONDS);
+        }, 5, 5, TimeUnit.SECONDS);
     }
 
     @Override

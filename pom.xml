@@ -82,6 +82,10 @@
             <id>cube-space</id>
             <url>http://nexus.cube-space.net/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>snapshot-repo</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
     </repositories>
 
     <dependencies>
