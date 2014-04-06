@@ -23,6 +23,16 @@ public class ExtendedServerInfo {
         return exSI;
     }
 
+    public static ArrayList<String> getServerNames() {
+        ArrayList<String> serverNames = new ArrayList<>();
+        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
+            if (serverNames.contains(extendedServerInfo.getServerName()) == false) {
+                serverNames.add(extendedServerInfo.getServerName());
+            }
+        }
+        return serverNames;
+    }
+
     private final ServerInfo serverInfo;
     private final int maxPlayers;
     private final String serverName;

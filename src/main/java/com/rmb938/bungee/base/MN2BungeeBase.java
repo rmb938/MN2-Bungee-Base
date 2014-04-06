@@ -1,6 +1,8 @@
 package com.rmb938.bungee.base;
 
 import com.rmb938.bungee.base.command.CommandMaintenance;
+import com.rmb938.bungee.base.command.CommandServer;
+import com.rmb938.bungee.base.command.CommandStop;
 import com.rmb938.bungee.base.config.MainConfig;
 import com.rmb938.bungee.base.database.DatabaseReconnectHandler;
 import com.rmb938.bungee.base.jedis.NetCommandHandlerBTB;
@@ -72,6 +74,8 @@ public class MN2BungeeBase extends Plugin {
         new PlayerListener(this);
 
         getProxy().getPluginManager().registerCommand(this, new CommandMaintenance(this));
+        getProxy().getPluginManager().registerCommand(this, new CommandStop(this));
+        getProxy().getPluginManager().registerCommand(this, new CommandServer(this));
 
         getProxy().getScheduler().schedule(this, new Runnable() {
             @Override
