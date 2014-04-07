@@ -31,6 +31,7 @@ public class MN2BungeeBase extends Plugin {
         mainConfig = new MainConfig(this);
         try {
             mainConfig.init();
+            mainConfig.save();
         } catch (InvalidConfigurationException e) {
             getLogger().log(Level.SEVERE, null ,e);
             return;
@@ -52,7 +53,9 @@ public class MN2BungeeBase extends Plugin {
 
         DatabaseAPI.initializeMySQL(mainConfig.mySQL_userName, mainConfig.mySQL_password, mainConfig.mySQL_database, mainConfig.mySQL_address, mainConfig.mySQL_port);
 
-        getProxy().setReconnectHandler(new DatabaseReconnectHandler(this));
+        if (mainConfig.users_save == true) {
+            getProxy().setReconnectHandler(new DatabaseReconnectHandler(this));
+        }
 
         getProxy().getServers().clear();
 

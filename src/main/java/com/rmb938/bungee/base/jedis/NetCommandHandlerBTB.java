@@ -41,7 +41,7 @@ public class NetCommandHandlerBTB extends NetCommandHandler {
                     Iterator<ProxiedPlayer> players = plugin.getProxy().getPlayers().iterator();
                     while(players.hasNext()) {
                         ProxiedPlayer player = players.next();
-                        player.disconnect(new TextComponent("Server is going down for maintenance."));
+                        player.disconnect(new TextComponent(plugin.getMainConfig().maintenance_kick));
                     }
                     break;
                 default:

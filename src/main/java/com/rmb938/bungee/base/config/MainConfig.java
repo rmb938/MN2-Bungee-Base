@@ -1,6 +1,7 @@
 package com.rmb938.bungee.base.config;
 
 import net.cubespace.Yamler.Config.Comment;
+import net.cubespace.Yamler.Config.Comments;
 import net.cubespace.Yamler.Config.Config;
 import net.md_5.bungee.api.plugin.Plugin;
 
@@ -13,6 +14,15 @@ public class MainConfig extends Config {
         CONFIG_HEADER = new String[]{"MN2 Bungee Base Configuration File"};
         CONFIG_FILE = new File(plugin.getDataFolder(), "config.yml");
     }
+
+    @Comments({"Save users to the database",
+                "If set to false it disables the reconnect handler"})
+    public boolean users_save = true;
+
+    @Comment("MOTD to show while in maintenance mode")
+    public String maintenance_motd = "Maintenance Mode";
+    @Comment("Kick message to show while in maintenance mode")
+    public String maintenance_kick = "Server is in Maintenance Mode";
 
     @Comment("The IP address for the redis server")
     public String redis_address = "127.0.0.1";

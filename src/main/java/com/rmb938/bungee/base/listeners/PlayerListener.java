@@ -30,20 +30,19 @@ public class PlayerListener implements Listener {
         ServerPing.Players players = new ServerPing.Players(max, online, event.getResponse().getPlayers().getSample());
         serverPing.setPlayers(players);
         if (plugin.isMaintenance()) {
-            serverPing.setDescription("Maintenance Mode");
+            serverPing.setDescription(plugin.getMainConfig().maintenance_motd);
         } else {
-            serverPing.setDescription("MN Squared Testing");
+            serverPing.setDescription(event.getResponse().getDescription());
         }
         serverPing.setVersion(event.getResponse().getVersion());
         event.setResponse(serverPing);
-        plugin.getLogger().info("PINGED");
     }
 
     @EventHandler
     public void onPlayerLogin(PostLoginEvent event) {
         if (plugin.isMaintenance()) {
             if (event.getPlayer().hasPermission("mn2.bungee.maintenance") == false) {
-                event.getPlayer().disconnect(new TextComponent("Server is in Maintenance Mode"));
+                event.getPlayer().disconnect(new TextComponent(plugin.getMainConfig().maintenance_kick));
             }
         }
     }
