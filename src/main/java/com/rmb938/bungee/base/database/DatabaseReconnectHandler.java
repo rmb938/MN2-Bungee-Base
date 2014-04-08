@@ -18,7 +18,9 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
 
     public DatabaseReconnectHandler(MN2BungeeBase plugin) {
         this.plugin = plugin;
-        createTable();
+        if (plugin.getMainConfig().users_save == true) {
+            createTable();
+        }
     }
 
     public void createTable() {
@@ -78,13 +80,18 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
                     }
                 }
             }
-        }
-        if (serverInfo1 == null) {
+            if (serverInfo1 == null) {
+                serverInfo1 = getServer(player);
+            }
+        } else {
             String defaultServer = player.getPendingConnection().getListener().getDefaultServer();
-            for (ExtendedServerInfo extendedServerInfo1 : ExtendedServerInfo.getExtendedInfos().values()) {
-                if (extendedServerInfo1.getServerName().equalsIgnoreCase(defaultServer)) {
-                    if (extendedServerInfo1.getFree() >= 1) {
-                        serverInfo1 = extendedServerInfo1.getServerInfo();
+            for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
+                if (extendedServerInfo.getServerInfo() == serverInfo) {
+                    continue;
+                }
+                if (extendedServerInfo.getServerName().equalsIgnoreCase(defaultServer)) {
+                    if (extendedServerInfo.getFree() >= 1) {
+                        serverInfo1 = extendedServerInfo.getServerInfo();
                         break;
                     }
                 }

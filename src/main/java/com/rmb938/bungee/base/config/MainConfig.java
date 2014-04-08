@@ -16,9 +16,11 @@ public class MainConfig extends Config {
     }
 
     @Comments({"Save users to the database",
-                "If set to false it disables the reconnect handler"})
+                "If set to false users will always initially connect to the default server"})
     public boolean users_save = true;
-    @Comment("If we should try and reconnect to the default server first or a similar server first.")
+    @Comments({"If we should try and reconnect to the default server first or a similar server first.",
+                "If we can't connect to a similar server we try to connect to the last server the user was on.",
+                "If we can't connect to the last server the user was on then we connect to the default server."})
     public boolean users_reconnectDefault = false;
 
     @Comment("MOTD to show while in maintenance mode")

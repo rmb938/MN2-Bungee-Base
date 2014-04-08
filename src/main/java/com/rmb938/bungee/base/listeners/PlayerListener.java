@@ -1,11 +1,14 @@
 package com.rmb938.bungee.base.listeners;
 
 import com.rmb938.bungee.base.MN2BungeeBase;
+import com.rmb938.bungee.base.database.DatabaseReconnectHandler;
 import com.rmb938.bungee.base.entity.ExtendedServerInfo;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ProxyPingEvent;
+import net.md_5.bungee.api.event.ServerKickEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
@@ -45,6 +48,22 @@ public class PlayerListener implements Listener {
                 event.getPlayer().disconnect(new TextComponent(plugin.getMainConfig().maintenance_kick));
             }
         }
+    }
+
+    @EventHandler
+    public void onServerKick(ServerKickEvent event) {
+        if (event.getKickReason().contains("kick") || event.getKickReason().contains("ban")) {
+            return;
+        }
+        ServerInfo newServer = ((DatabaseReconnectHandler)plugin.getProxy().getReconnectHandler()).getSimilarServer(event.getPlayer(), event.getPlayer().getServer().getInfo());
+        if (newServer != null) {
+            event.getPlayer().sendMessage(new TextComponent("The server you were on unexpectedly disconnected."));
+        } else {
+            event.setKickReason("The server you were on unexpectedly disconnected.");
+            return;
+        }
+        event.setCancelled(true);
+        event.setCancelServer(newServer);
     }
 
 }
