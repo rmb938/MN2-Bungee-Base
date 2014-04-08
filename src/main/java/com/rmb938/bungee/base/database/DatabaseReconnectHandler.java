@@ -41,13 +41,17 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
             server = getStoredServer(player);
             if (server == null) {
                 String defaultServer = player.getPendingConnection().getListener().getDefaultServer();
+                ArrayList<ServerInfo> serverInfos = new ArrayList<>();
                 for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
                     if (extendedServerInfo.getServerName().equalsIgnoreCase(defaultServer)) {
                         if (extendedServerInfo.getFree() >= 1) {
-                            server = extendedServerInfo.getServerInfo();
-                            break;
+                            serverInfos.add(extendedServerInfo.getServerInfo());
                         }
                     }
+                }
+                if (serverInfos.isEmpty() == false) {
+                    int random = (int) (Math.random() * serverInfos.size());
+                    server = serverInfos.get(random);
                 }
             }
         }
@@ -62,22 +66,27 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         if (plugin.getMainConfig().users_reconnectDefault == false) {
             ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(serverInfo.getName());
             boolean reconnect = true;
-            for (String serverName : plugin.getMainConfig().serverNames) {
+            for (String serverName : plugin.getMainConfig().users_serverNames) {
                 if (extendedServerInfo.getServerName().startsWith(serverName)) {
                     reconnect = false;
                     break;
                 }
             }
             if (reconnect == true) {
+                ArrayList<ServerInfo> serverInfos = new ArrayList<>();
                 for (ExtendedServerInfo extendedServerInfo1 : ExtendedServerInfo.getExtendedInfos().values()) {
                     if (extendedServerInfo1.getServerInfo() == serverInfo) {
                         continue;
                     }
                     if (extendedServerInfo.getServerName().equalsIgnoreCase(extendedServerInfo1.getServerName())) {
                         if (extendedServerInfo1.getFree() >= 1) {
-                            serverInfo1 = extendedServerInfo1.getServerInfo();
+                            serverInfos.add(extendedServerInfo.getServerInfo());
                         }
                     }
+                }
+                if (serverInfos.isEmpty() == false) {
+                    int random = (int) (Math.random() * serverInfos.size());
+                    serverInfo1 = serverInfos.get(random);
                 }
             }
             if (serverInfo1 == null) {
@@ -85,16 +94,20 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
             }
         } else {
             String defaultServer = player.getPendingConnection().getListener().getDefaultServer();
+            ArrayList<ServerInfo> serverInfos = new ArrayList<>();
             for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
                 if (extendedServerInfo.getServerInfo() == serverInfo) {
                     continue;
                 }
                 if (extendedServerInfo.getServerName().equalsIgnoreCase(defaultServer)) {
                     if (extendedServerInfo.getFree() >= 1) {
-                        serverInfo1 = extendedServerInfo.getServerInfo();
-                        break;
+                        serverInfos.add(extendedServerInfo.getServerInfo());
                     }
                 }
+            }
+            if (serverInfos.isEmpty() == false) {
+                int random = (int) (Math.random() * serverInfos.size());
+                serverInfo1 = serverInfos.get(random);
             }
         }
         return serverInfo1;
@@ -139,7 +152,7 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         }
         ServerInfo serverInfo = proxiedPlayer.getServer().getInfo();
         ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(serverInfo.getName());
-        for (String serverName : plugin.getMainConfig().serverNames) {
+        for (String serverName : plugin.getMainConfig().users_serverNames) {
             if (extendedServerInfo.getServerName().startsWith(serverName)) {
                 return;
             }

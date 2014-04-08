@@ -81,11 +81,15 @@ public class CommandServer extends Command implements TabExecutor {
                     JedisManager.returnJedis(jedis);
                 } else if (info.length == 1) {
                     ArrayList<ExtendedServerInfo> extendedServerInfos = ExtendedServerInfo.getExtendedInfos(info[0]);
+                    ArrayList<ServerInfo> serverInfos = new ArrayList<>();
                     for (ExtendedServerInfo extendedServerInfo : extendedServerInfos) {
                         if (extendedServerInfo.getFree() > 1) {
-                            server = extendedServerInfo.getServerInfo();
-                            break;
+                            serverInfos.add(extendedServerInfo.getServerInfo());
                         }
+                    }
+                    if (serverInfos.isEmpty() == false) {
+                        int random = (int) (Math.random() * serverInfos.size());
+                        server = serverInfos.get(random);
                     }
                 }
             }

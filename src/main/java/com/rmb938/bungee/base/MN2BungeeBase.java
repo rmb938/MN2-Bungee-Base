@@ -1,11 +1,9 @@
 package com.rmb938.bungee.base;
 
 import com.rmb938.bungee.base.command.CommandList;
-import com.rmb938.bungee.base.command.CommandMaintenance;
 import com.rmb938.bungee.base.command.CommandServer;
 import com.rmb938.bungee.base.config.MainConfig;
 import com.rmb938.bungee.base.database.DatabaseReconnectHandler;
-import com.rmb938.bungee.base.jedis.NetCommandHandlerBTB;
 import com.rmb938.bungee.base.jedis.NetCommandHandlerSCTB;
 import com.rmb938.bungee.base.jedis.NetCommandHandlerSTB;
 import com.rmb938.bungee.base.listeners.PlayerListener;
@@ -23,12 +21,11 @@ import java.util.logging.Level;
 public class MN2BungeeBase extends Plugin {
 
     private MainConfig mainConfig;
-    private boolean maintenance;
     private String IP;
 
     @Override
     public void onEnable() {
-        maintenance = true;
+
         mainConfig = new MainConfig(this);
         try {
             mainConfig.init();
@@ -69,24 +66,14 @@ public class MN2BungeeBase extends Plugin {
             return;
         }
 
-        new NetCommandHandlerBTB(this);
         new NetCommandHandlerSCTB(this);
         new NetCommandHandlerSTB(this);
 
         new PlayerListener(this);
         new PluginListener(this);
 
-        getProxy().getPluginManager().registerCommand(this, new CommandMaintenance(this));
         getProxy().getPluginManager().registerCommand(this, new CommandServer(this));
         getProxy().getPluginManager().registerCommand(this, new CommandList(this));
-
-        getProxy().getScheduler().schedule(this, new Runnable() {
-            @Override
-            public void run() {
-                maintenance = false;
-                getLogger().info("Removing Maintenance Mode");
-            }
-        }, 30L, TimeUnit.SECONDS);
 
         getProxy().getScheduler().schedule(this, new Runnable() {
             @Override
@@ -103,14 +90,6 @@ public class MN2BungeeBase extends Plugin {
 
     public String getIP() {
         return IP;
-    }
-
-    public boolean isMaintenance() {
-        return maintenance;
-    }
-
-    public void setMaintenance(boolean maintenance) {
-        this.maintenance = maintenance;
     }
 
     public MainConfig getMainConfig() {

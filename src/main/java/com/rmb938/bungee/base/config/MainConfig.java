@@ -22,6 +22,15 @@ public class MainConfig extends Config {
                 "If we can't connect to a similar server we try to connect to the last server the user was on.",
                 "If we can't connect to the last server the user was on then we connect to the default server."})
     public boolean users_reconnectDefault = false;
+    @Comment("If the kick message of a server contains any of these words don't try to reconnect the user.")
+    public ArrayList<String> users_kickBlacklist = new ArrayList<String>() {{
+        add("kick");
+        add("ban");
+    }};
+    @Comment("List of server name prefixes to not reconnect to")
+    public ArrayList<String> users_serverNames = new ArrayList<String>() {{
+        add("mg");
+    }};
 
     @Comment("MOTD to show while in maintenance mode")
     public String maintenance_motd = "Maintenance Mode";
@@ -42,10 +51,6 @@ public class MainConfig extends Config {
     @Comment("The database name for the mySQL server")
     public String mySQL_database = "database";
 
-    @Comment("List of server name prefixes to not reconnect to")
-    public ArrayList<String> serverNames = new ArrayList<String>() {{
-        add("mg");
-    }};
 
 
 }

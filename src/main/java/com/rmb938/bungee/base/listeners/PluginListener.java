@@ -3,15 +3,14 @@ package com.rmb938.bungee.base.listeners;
 import com.rmb938.bungee.base.MN2BungeeBase;
 import com.rmb938.bungee.base.entity.ExtendedServerInfo;
 import com.rmb938.jedis.JedisManager;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import redis.clients.jedis.Jedis;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
@@ -38,12 +37,16 @@ public class PluginListener implements Listener {
                     String[] info = in.readUTF().split("\\.");
                     if (info.length == 1) {
                         ArrayList<ExtendedServerInfo> extendedServerInfos = ExtendedServerInfo.getExtendedInfos(info[0]);
+                        ArrayList<ServerInfo> serverInfos = new ArrayList<>();
                         for (ExtendedServerInfo extendedServerInfo : extendedServerInfos) {
                             if (extendedServerInfo.getFree() > 1) {
-                                ProxiedPlayer player = (ProxiedPlayer) event.getReceiver();
-                                player.connect(extendedServerInfo.getServerInfo());
-                                break;
+                                serverInfos.add(extendedServerInfo.getServerInfo());
                             }
+                        }
+                        if (serverInfos.isEmpty() == false) {
+                            int random = (int) (Math.random() * serverInfos.size());
+                            ProxiedPlayer player = (ProxiedPlayer) event.getReceiver();
+                            player.connect(serverInfos.get(random));
                         }
                     } else if (info.length == 2) {
                         Jedis jedis = JedisManager.getJedis();
@@ -54,6 +57,20 @@ public class PluginListener implements Listener {
                         }
                         JedisManager.returnJedis(jedis);
                     }
+                    event.setCancelled(true);
+                } else if (subchannel.equalsIgnoreCase("typeAmount")) {
+                    String type = in.readUTF();
+                    int amount = ExtendedServerInfo.getExtendedInfos(type).size();
+
+                    ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+                    DataOutputStream out = new DataOutputStream(byteArray);
+
+                    out.writeUTF("typeAmount");
+                    out.writeInt(amount);
+                    out.flush();
+
+                    ProxiedPlayer player = (ProxiedPlayer) event.getReceiver();
+                    player.getServer().sendData("BungeeCord", byteArray.toByteArray());
                     event.setCancelled(true);
                 }
             } catch (IOException e) {

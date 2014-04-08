@@ -6,7 +6,6 @@ import com.rmb938.bungee.base.entity.ExtendedServerInfo;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
-import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ProxyPingEvent;
 import net.md_5.bungee.api.event.ServerKickEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -32,28 +31,17 @@ public class PlayerListener implements Listener {
         ServerPing serverPing = new ServerPing();
         ServerPing.Players players = new ServerPing.Players(max, online, event.getResponse().getPlayers().getSample());
         serverPing.setPlayers(players);
-        if (plugin.isMaintenance()) {
-            serverPing.setDescription(plugin.getMainConfig().maintenance_motd);
-        } else {
-            serverPing.setDescription(event.getResponse().getDescription());
-        }
+        serverPing.setDescription(event.getResponse().getDescription());
         serverPing.setVersion(event.getResponse().getVersion());
         event.setResponse(serverPing);
     }
 
     @EventHandler
-    public void onPlayerLogin(PostLoginEvent event) {
-        if (plugin.isMaintenance()) {
-            if (event.getPlayer().hasPermission("mn2.bungee.maintenance") == false) {
-                event.getPlayer().disconnect(new TextComponent(plugin.getMainConfig().maintenance_kick));
-            }
-        }
-    }
-
-    @EventHandler
     public void onServerKick(ServerKickEvent event) {
-        if (event.getKickReason().contains("kick") || event.getKickReason().contains("ban")) {
-            return;
+        for (String word : plugin.getMainConfig().users_kickBlacklist) {
+            if (event.getKickReason().toLowerCase().contains(word.toLowerCase())) {
+                return;
+            }
         }
         ServerInfo newServer = ((DatabaseReconnectHandler)plugin.getProxy().getReconnectHandler()).getSimilarServer(event.getPlayer(), event.getPlayer().getServer().getInfo());
         if (newServer != null) {
