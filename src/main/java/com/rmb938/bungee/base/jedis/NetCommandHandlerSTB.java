@@ -46,11 +46,9 @@ public class NetCommandHandlerSTB extends NetCommandHandler {
                         extendedServerInfo = new ExtendedServerInfo(serverInfo, maxPlayers, serverName);
                         ExtendedServerInfo.getExtendedInfos().put(fromServer, extendedServerInfo);
                     }
-                    plugin.getLogger().info("Heartbeat from "+extendedServerInfo.getServerName());
                     extendedServerInfo.setCurrentPlayers(currentPlayers);
                     break;
                 case "removeServer":
-                    ExtendedServerInfo.getExtendedInfos().remove(fromServer);
                     ServerInfo serverInfo = plugin.getProxy().getServerInfo(fromServer);
                     for (ProxiedPlayer proxiedPlayer : serverInfo.getPlayers()) {
                         ServerInfo newServer = ((DatabaseReconnectHandler)plugin.getProxy().getReconnectHandler()).getSimilarServer(proxiedPlayer, serverInfo);
@@ -61,6 +59,7 @@ public class NetCommandHandlerSTB extends NetCommandHandler {
                             proxiedPlayer.disconnect(new TextComponent("The server you were on unexpectedly disconnected."));
                         }
                     }
+                    ExtendedServerInfo.getExtendedInfos().remove(fromServer);
                     plugin.getProxy().getServers().remove(fromServer);
                     break;
                 default:

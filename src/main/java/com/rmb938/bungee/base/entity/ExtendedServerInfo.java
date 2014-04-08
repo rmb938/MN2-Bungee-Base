@@ -2,35 +2,16 @@ package com.rmb938.bungee.base.entity;
 
 import net.md_5.bungee.api.config.ServerInfo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ExtendedServerInfo {
 
-    private static HashMap<String, ExtendedServerInfo> extendedInfos = new HashMap<>();
+    private final static ConcurrentHashMap<String, ExtendedServerInfo> extendedInfos = new ConcurrentHashMap<>();
 
-    public static HashMap<String, ExtendedServerInfo> getExtendedInfos() {
-        return extendedInfos;
-    }
-
-    public static ArrayList<ExtendedServerInfo> getExtendedInfos(String serverName) {
-        ArrayList<ExtendedServerInfo> exSI = new ArrayList<>();
-        for (ExtendedServerInfo extendedServerInfo : extendedInfos.values()) {
-            if (extendedServerInfo.getServerName().equalsIgnoreCase(serverName)) {
-                exSI.add(extendedServerInfo);
-            }
+    public static ConcurrentHashMap<String, ExtendedServerInfo> getExtendedInfos() {
+        synchronized (extendedInfos) {
+            return extendedInfos;
         }
-        return exSI;
-    }
-
-    public static ArrayList<String> getServerNames() {
-        ArrayList<String> serverNames = new ArrayList<>();
-        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
-            if (serverNames.contains(extendedServerInfo.getServerName()) == false) {
-                serverNames.add(extendedServerInfo.getServerName());
-            }
-        }
-        return serverNames;
     }
 
     private final ServerInfo serverInfo;
