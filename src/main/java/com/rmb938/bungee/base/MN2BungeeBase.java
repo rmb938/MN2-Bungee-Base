@@ -9,6 +9,7 @@ import com.rmb938.bungee.base.jedis.NetCommandHandlerBTB;
 import com.rmb938.bungee.base.jedis.NetCommandHandlerSCTB;
 import com.rmb938.bungee.base.jedis.NetCommandHandlerSTB;
 import com.rmb938.bungee.base.listeners.PlayerListener;
+import com.rmb938.bungee.base.listeners.PluginListener;
 import com.rmb938.database.DatabaseAPI;
 import com.rmb938.jedis.JedisManager;
 import com.rmb938.jedis.net.command.bungee.NetCommandBTSC;
@@ -53,9 +54,7 @@ public class MN2BungeeBase extends Plugin {
 
         DatabaseAPI.initializeMySQL(mainConfig.mySQL_userName, mainConfig.mySQL_password, mainConfig.mySQL_database, mainConfig.mySQL_address, mainConfig.mySQL_port);
 
-        if (mainConfig.users_save == true) {
-            getProxy().setReconnectHandler(new DatabaseReconnectHandler(this));
-        }
+        getProxy().setReconnectHandler(new DatabaseReconnectHandler(this));
 
         getProxy().getServers().clear();
 
@@ -75,6 +74,7 @@ public class MN2BungeeBase extends Plugin {
         new NetCommandHandlerSTB(this);
 
         new PlayerListener(this);
+        new PluginListener(this);
 
         getProxy().getPluginManager().registerCommand(this, new CommandMaintenance(this));
         getProxy().getPluginManager().registerCommand(this, new CommandStop(this));

@@ -1,6 +1,7 @@
 package com.rmb938.bungee.base.jedis;
 
 import com.rmb938.bungee.base.MN2BungeeBase;
+import com.rmb938.bungee.base.database.DatabaseReconnectHandler;
 import com.rmb938.bungee.base.entity.ExtendedServerInfo;
 import com.rmb938.jedis.net.NetChannel;
 import com.rmb938.jedis.net.NetCommandHandler;
@@ -52,7 +53,7 @@ public class NetCommandHandlerSTB extends NetCommandHandler {
                     ExtendedServerInfo.getExtendedInfos().remove(fromServer);
                     ServerInfo serverInfo = plugin.getProxy().getServerInfo(fromServer);
                     for (ProxiedPlayer proxiedPlayer : serverInfo.getPlayers()) {
-                        ServerInfo newServer = plugin.getProxy().getReconnectHandler().getServer(proxiedPlayer);
+                        ServerInfo newServer = ((DatabaseReconnectHandler)plugin.getProxy().getReconnectHandler()).getSimilarServer(proxiedPlayer, serverInfo);
                         if (newServer != null) {
                             proxiedPlayer.sendMessage(new TextComponent("The server you were on unexpectedly disconnected."));
                             proxiedPlayer.connect(newServer);

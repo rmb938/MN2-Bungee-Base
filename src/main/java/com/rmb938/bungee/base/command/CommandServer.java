@@ -5,6 +5,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.rmb938.bungee.base.MN2BungeeBase;
 import com.rmb938.bungee.base.entity.ExtendedServerInfo;
+import com.rmb938.jedis.JedisManager;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -16,9 +17,11 @@ import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
+import redis.clients.jedis.Jedis;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 public class CommandServer extends Command implements TabExecutor {
 
@@ -38,7 +41,34 @@ public class CommandServer extends Command implements TabExecutor {
         Map<String, ServerInfo> servers = plugin.getProxy().getServers();
         if (args.length == 0) {
             ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(player.getServer().getInfo().getName());
-            TextComponent currentServer = new TextComponent(plugin.getProxy().getTranslation("current_server") + extendedServerInfo.getServerName());
+
+            Jedis jedis = JedisManager.getJedis();
+            while (jedis.setnx("lock." + extendedServerInfo.getServerName()+".key", System.currentTimeMillis() + 30000 + "") == 0) {
+                String lock = jedis.get("lock." + extendedServerInfo.getServerName()+".key");
+                long time = Long.parseLong(lock != null ? lock : "0");
+                if (System.currentTimeMillis() > time) {
+                    time = Long.parseLong(jedis.getSet("lock." + extendedServerInfo.getServerName()+".key", System.currentTimeMillis() + 30000 + ""));
+                    if (System.currentTimeMillis() < time) {
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
+                break;
+            }
+            Set<String> keys = jedis.keys("server." + extendedServerInfo.getServerName() + ".*");
+            int id = -1;
+            for (String key : keys) {
+                String uuid = jedis.get(key);
+                if (uuid.equals(player.getServer().getInfo().getName())) {
+                    id = Integer.parseInt(key.split("\\.")[2]);
+                    break;
+                }
+            }
+            jedis.del("lock." + extendedServerInfo.getServerName()+".key");
+            JedisManager.returnJedis(jedis);
+
+            TextComponent currentServer = new TextComponent(plugin.getProxy().getTranslation("current_server") + extendedServerInfo.getServerName()+id);
             currentServer.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("IP: " + extendedServerInfo.getServerInfo().getAddress().getAddress()
                     + " Port: " + extendedServerInfo.getServerInfo().getAddress().getPort()).create()));
             player.sendMessage(currentServer);
@@ -48,7 +78,33 @@ public class CommandServer extends Command implements TabExecutor {
             for (ServerInfo server : servers.values()) {
                 if (server.canAccess(player)) {
                     extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(server.getName());
-                    TextComponent serverTextComponent = new TextComponent(first ? extendedServerInfo.getServerName() : ", " + extendedServerInfo.getServerName());
+                    jedis = JedisManager.getJedis();
+                    while (jedis.setnx("lock." + extendedServerInfo.getServerName()+".key", System.currentTimeMillis() + 30000 + "") == 0) {
+                        String lock = jedis.get("lock." + extendedServerInfo.getServerName()+".key");
+                        long time = Long.parseLong(lock != null ? lock : "0");
+                        if (System.currentTimeMillis() > time) {
+                            time = Long.parseLong(jedis.getSet("lock." + extendedServerInfo.getServerName()+".key", System.currentTimeMillis() + 30000 + ""));
+                            if (System.currentTimeMillis() < time) {
+                                continue;
+                            }
+                        } else {
+                            continue;
+                        }
+                        break;
+                    }
+                    keys = jedis.keys("server." + extendedServerInfo.getServerName() + ".*");
+                    id = -1;
+                    for (String key : keys) {
+                        String uuid = jedis.get(key);
+                        if (uuid.equals(server.getName())) {
+                            id = Integer.parseInt(key.split("\\.")[2]);
+                            break;
+                        }
+                    }
+                    jedis.del("lock." + extendedServerInfo.getServerName()+".key");
+                    JedisManager.returnJedis(jedis);
+
+                    TextComponent serverTextComponent = new TextComponent(first ? extendedServerInfo.getServerName()+id : ", " + extendedServerInfo.getServerName()+id);
                     serverTextComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("IP: " + extendedServerInfo.getServerInfo().getAddress().getAddress()
                             + " Port: " + extendedServerInfo.getServerInfo().getAddress().getPort()).create()));
                     serverTextComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/server " + server.getName()));

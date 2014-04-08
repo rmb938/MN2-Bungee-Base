@@ -38,15 +38,11 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         if (server == null) {
             server = getStoredServer(player);
             if (server == null) {
-                plugin.getLogger().info("Stored = null");
                 String defaultServer = player.getPendingConnection().getListener().getDefaultServer();
-                plugin.getLogger().info("Default Server: "+defaultServer);
                 for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
-                    plugin.getLogger().info("Tested Server: "+extendedServerInfo.getServerName());
                     if (extendedServerInfo.getServerName().equalsIgnoreCase(defaultServer)) {
                         if (extendedServerInfo.getFree() >= 1) {
                             server = extendedServerInfo.getServerInfo();
-                            plugin.getLogger().info("Found server");
                             break;
                         }
                     }
@@ -59,8 +55,49 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         return server;
     }
 
+    public ServerInfo getSimilarServer(ProxiedPlayer player, ServerInfo serverInfo) {
+        ServerInfo serverInfo1 = null;
+        if (plugin.getMainConfig().users_reconnectDefault == false) {
+            ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(serverInfo.getName());
+            boolean reconnect = true;
+            for (String serverName : plugin.getMainConfig().serverNames) {
+                if (extendedServerInfo.getServerName().startsWith(serverName)) {
+                    reconnect = false;
+                    break;
+                }
+            }
+            if (reconnect == true) {
+                for (ExtendedServerInfo extendedServerInfo1 : ExtendedServerInfo.getExtendedInfos().values()) {
+                    if (extendedServerInfo1.getServerInfo() == serverInfo) {
+                        continue;
+                    }
+                    if (extendedServerInfo.getServerName().equalsIgnoreCase(extendedServerInfo1.getServerName())) {
+                        if (extendedServerInfo1.getFree() >= 1) {
+                            serverInfo1 = extendedServerInfo1.getServerInfo();
+                        }
+                    }
+                }
+            }
+        }
+        if (serverInfo1 == null) {
+            String defaultServer = player.getPendingConnection().getListener().getDefaultServer();
+            for (ExtendedServerInfo extendedServerInfo1 : ExtendedServerInfo.getExtendedInfos().values()) {
+                if (extendedServerInfo1.getServerName().equalsIgnoreCase(defaultServer)) {
+                    if (extendedServerInfo1.getFree() >= 1) {
+                        serverInfo1 = extendedServerInfo1.getServerInfo();
+                        break;
+                    }
+                }
+            }
+        }
+        return serverInfo1;
+    }
+
     @Override
     protected ServerInfo getStoredServer(ProxiedPlayer proxiedPlayer) {
+        if (plugin.getMainConfig().users_save == false) {
+            return null;
+        }
         ArrayList<Object> beansInfo = DatabaseAPI.getMySQLDatabase().getBeansInfo("select server from mn2_users where userUUID='" + proxiedPlayer.getUniqueId().toString() + "'", new MapListHandler());
         if (beansInfo.isEmpty()) {
             createUser(proxiedPlayer);
@@ -90,6 +127,9 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
 
     @Override
     public void setServer(ProxiedPlayer proxiedPlayer) {
+        if (plugin.getMainConfig().users_save == false) {
+            return;
+        }
         ServerInfo serverInfo = proxiedPlayer.getServer().getInfo();
         ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(serverInfo.getName());
         for (String serverName : plugin.getMainConfig().serverNames) {
