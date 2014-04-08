@@ -104,7 +104,7 @@ public class CommandServer extends Command implements TabExecutor {
                     jedis.del("lock." + extendedServerInfo.getServerName()+".key");
                     JedisManager.returnJedis(jedis);
 
-                    TextComponent serverTextComponent = new TextComponent(first ? extendedServerInfo.getServerName()+"."+id : ", " + extendedServerInfo.getServerName()+id);
+                    TextComponent serverTextComponent = new TextComponent(first ? extendedServerInfo.getServerName()+"."+id : ", " + extendedServerInfo.getServerName()+"."+id);
                     serverTextComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("IP: " + extendedServerInfo.getServerInfo().getAddress().getAddress()
                             + " Port: " + extendedServerInfo.getServerInfo().getAddress().getPort()).create()));
                     serverTextComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/server " + server.getName()));
@@ -117,12 +117,17 @@ public class CommandServer extends Command implements TabExecutor {
             String serverName = args[0];
             ServerInfo server = servers.get(serverName);
             if (server == null) {
-                Jedis jedis = JedisManager.getJedis();
-                String uuid = jedis.get("server."+serverName+".");
-                if (uuid != null) {
-                    server = servers.get(uuid);
+                String[] info = serverName.split("\\.");
+                if (info.length == 2) {
+                    serverName = info[0];
+                    int id = Integer.parseInt(info[1]);
+                    Jedis jedis = JedisManager.getJedis();
+                    String uuid = jedis.get("server." + serverName + "." + id);
+                    if (uuid != null) {
+                        server = servers.get(uuid);
+                    }
+                    JedisManager.returnJedis(jedis);
                 }
-                JedisManager.returnJedis(jedis);
             }
             if (server == null) {
                 player.sendMessage(plugin.getProxy().getTranslation("no_server"));
