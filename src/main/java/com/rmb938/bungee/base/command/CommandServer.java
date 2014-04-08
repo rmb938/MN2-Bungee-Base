@@ -68,7 +68,7 @@ public class CommandServer extends Command implements TabExecutor {
             jedis.del("lock." + extendedServerInfo.getServerName()+".key");
             JedisManager.returnJedis(jedis);
 
-            TextComponent currentServer = new TextComponent(plugin.getProxy().getTranslation("current_server") + extendedServerInfo.getServerName()+id);
+            TextComponent currentServer = new TextComponent(plugin.getProxy().getTranslation("current_server") + extendedServerInfo.getServerName()+"."+id);
             currentServer.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("IP: " + extendedServerInfo.getServerInfo().getAddress().getAddress()
                     + " Port: " + extendedServerInfo.getServerInfo().getAddress().getPort()).create()));
             player.sendMessage(currentServer);
@@ -104,7 +104,7 @@ public class CommandServer extends Command implements TabExecutor {
                     jedis.del("lock." + extendedServerInfo.getServerName()+".key");
                     JedisManager.returnJedis(jedis);
 
-                    TextComponent serverTextComponent = new TextComponent(first ? extendedServerInfo.getServerName()+id : ", " + extendedServerInfo.getServerName()+id);
+                    TextComponent serverTextComponent = new TextComponent(first ? extendedServerInfo.getServerName()+"."+id : ", " + extendedServerInfo.getServerName()+id);
                     serverTextComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("IP: " + extendedServerInfo.getServerInfo().getAddress().getAddress()
                             + " Port: " + extendedServerInfo.getServerInfo().getAddress().getPort()).create()));
                     serverTextComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/server " + server.getName()));
@@ -114,7 +114,16 @@ public class CommandServer extends Command implements TabExecutor {
             }
             player.sendMessage(serverList);
         } else {
-            ServerInfo server = servers.get(args[0]);
+            String serverName = args[0];
+            ServerInfo server = servers.get(serverName);
+            if (server == null) {
+                Jedis jedis = JedisManager.getJedis();
+                String uuid = jedis.get("server."+serverName+".");
+                if (uuid != null) {
+                    server = servers.get(uuid);
+                }
+                JedisManager.returnJedis(jedis);
+            }
             if (server == null) {
                 player.sendMessage(plugin.getProxy().getTranslation("no_server"));
             } else if (!server.canAccess(player)) {

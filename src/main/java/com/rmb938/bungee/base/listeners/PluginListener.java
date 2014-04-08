@@ -40,6 +40,7 @@ public class PluginListener implements Listener {
                         ProxiedPlayer player = (ProxiedPlayer) event.getReceiver();
                         player.connect(plugin.getProxy().getServerInfo(uuid));
                     }
+                    JedisManager.returnJedis(jedis);
                     event.setCancelled(true);
                 }
             } catch (IOException e) {
