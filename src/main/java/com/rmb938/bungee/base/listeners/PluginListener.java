@@ -2,13 +2,11 @@ package com.rmb938.bungee.base.listeners;
 
 import com.rmb938.bungee.base.MN2BungeeBase;
 import com.rmb938.bungee.base.entity.ExtendedServerInfo;
-import com.rmb938.jedis.JedisManager;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
-import redis.clients.jedis.Jedis;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -49,13 +47,14 @@ public class PluginListener implements Listener {
                             player.connect(serverInfos.get(random));
                         }
                     } else if (info.length == 2) {
-                        Jedis jedis = JedisManager.getJedis();
-                        String uuid = jedis.get("server." + info[0] + "." + info[1]);
-                        if (uuid != null) {
-                            ProxiedPlayer player = (ProxiedPlayer) event.getReceiver();
-                            player.connect(plugin.getProxy().getServerInfo(uuid));
+                        int id = Integer.parseInt(info[1]);
+                        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
+                            if (extendedServerInfo.getServerId() == id) {
+                                ProxiedPlayer player = (ProxiedPlayer) event.getReceiver();
+                                player.connect(extendedServerInfo.getServerInfo());
+                                break;
+                            }
                         }
-                        JedisManager.returnJedis(jedis);
                     }
                     event.setCancelled(true);
                 } else if (subchannel.equalsIgnoreCase("typeAmount")) {

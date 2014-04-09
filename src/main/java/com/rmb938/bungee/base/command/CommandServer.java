@@ -5,7 +5,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.rmb938.bungee.base.MN2BungeeBase;
 import com.rmb938.bungee.base.entity.ExtendedServerInfo;
-import com.rmb938.jedis.JedisManager;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -17,7 +16,6 @@ import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
-import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,12 +71,12 @@ public class CommandServer extends Command implements TabExecutor {
                 if (info.length == 2) {
                     serverName = info[0];
                     int id = Integer.parseInt(info[1]);
-                    Jedis jedis = JedisManager.getJedis();
-                    String uuid = jedis.get("server." + serverName + "." + id);
-                    if (uuid != null) {
-                        server = servers.get(uuid);
+                    for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
+                        if (extendedServerInfo.getServerId() == id) {
+                            server = extendedServerInfo.getServerInfo();
+                            break;
+                        }
                     }
-                    JedisManager.returnJedis(jedis);
                 } else if (info.length == 1) {
                     ArrayList<ExtendedServerInfo> extendedServerInfos = ExtendedServerInfo.getExtendedInfos(info[0]);
                     ArrayList<ServerInfo> serverInfos = new ArrayList<>();
