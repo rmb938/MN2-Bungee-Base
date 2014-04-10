@@ -2,8 +2,11 @@ package com.rmb938.bungee.base;
 
 import com.rmb938.bungee.base.command.CommandList;
 import com.rmb938.bungee.base.command.CommandServer;
+import com.rmb938.bungee.base.command.CommandStopNetwork;
+import com.rmb938.bungee.base.command.CommandStopNode;
 import com.rmb938.bungee.base.config.MainConfig;
 import com.rmb938.bungee.base.database.DatabaseReconnectHandler;
+import com.rmb938.bungee.base.jedis.NetCommandHandlerBTB;
 import com.rmb938.bungee.base.jedis.NetCommandHandlerSCTB;
 import com.rmb938.bungee.base.jedis.NetCommandHandlerSTB;
 import com.rmb938.bungee.base.listeners.PlayerListener;
@@ -68,12 +71,15 @@ public class MN2BungeeBase extends Plugin {
 
         new NetCommandHandlerSCTB(this);
         new NetCommandHandlerSTB(this);
+        new NetCommandHandlerBTB(this);
 
         new PlayerListener(this);
         new PluginListener(this);
 
         getProxy().getPluginManager().registerCommand(this, new CommandServer(this));
         getProxy().getPluginManager().registerCommand(this, new CommandList(this));
+        getProxy().getPluginManager().registerCommand(this, new CommandStopNode(this));
+        getProxy().getPluginManager().registerCommand(this, new CommandStopNetwork(this));
 
         getProxy().getScheduler().schedule(this, new Runnable() {
             @Override

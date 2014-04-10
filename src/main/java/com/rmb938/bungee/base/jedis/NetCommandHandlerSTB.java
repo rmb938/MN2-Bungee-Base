@@ -62,7 +62,7 @@ public class NetCommandHandlerSTB extends NetCommandHandler {
                     plugin.getProxy().getServers().remove(fromServer);
                     break;
                 default:
-                    plugin.getLogger().info("Unknown STB Command MN2BukkitBase " + command);
+                    break;
             }
         } catch (JSONException e) {
             plugin.getLogger().log(Level.SEVERE, null, e);

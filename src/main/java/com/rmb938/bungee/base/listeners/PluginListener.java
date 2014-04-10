@@ -65,6 +65,7 @@ public class PluginListener implements Listener {
                     DataOutputStream out = new DataOutputStream(byteArray);
 
                     out.writeUTF("typeAmount");
+                    out.writeUTF(type);
                     out.writeInt(amount);
                     out.flush();
 
