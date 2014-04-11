@@ -33,6 +33,7 @@ public class PlayerListener implements Listener {
         serverPing.setPlayers(players);
         serverPing.setDescription(event.getResponse().getDescription());
         serverPing.setVersion(event.getResponse().getVersion());
+        serverPing.setFavicon(event.getResponse().getFavicon());
         event.setResponse(serverPing);
     }
 
