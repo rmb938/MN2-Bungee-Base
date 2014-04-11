@@ -33,9 +33,13 @@ public class CommandList extends Command {
                 ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(server.getName());
 
                 sender.sendMessage(plugin.getProxy().getTranslation("command_list", new Object[]{extendedServerInfo.getServerName()+"."+extendedServerInfo.getServerId(),
-                        server.getPlayers().size(), Util.format(players, ChatColor.RESET + ", ")}));
+                        extendedServerInfo.getCurrentPlayers(), Util.format(players, ChatColor.RESET + ", ")}));
             }
         }
-        sender.sendMessage(plugin.getProxy().getTranslation("total_players", new Object[]{plugin.getProxy().getOnlineCount()}));
+        int online = 0;
+        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
+            online += extendedServerInfo.getCurrentPlayers();
+        }
+        sender.sendMessage(plugin.getProxy().getTranslation("total_players", new Object[]{online}));
     }
 }

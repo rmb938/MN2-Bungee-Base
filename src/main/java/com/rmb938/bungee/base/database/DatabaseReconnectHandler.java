@@ -45,6 +45,10 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
                 for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
                     if (extendedServerInfo.getServerName().equalsIgnoreCase(defaultServer)) {
                         if (player.getServer() != null) {
+                            ExtendedServerInfo extendedServerInfo1 = ExtendedServerInfo.getExtendedInfos().get(player.getServer().getInfo().getName());
+                            if (extendedServerInfo == extendedServerInfo1) {
+                                continue;
+                            }
                         }
                         if (extendedServerInfo.getFree() >= 1) {
                             serverInfos.add(extendedServerInfo.getServerInfo());
