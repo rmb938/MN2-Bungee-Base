@@ -1,5 +1,7 @@
 package com.rmb938.bungee.base.database;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import com.rmb938.bungee.base.MN2BungeeBase;
 import com.rmb938.bungee.base.entity.ExtendedServerInfo;
 import com.rmb938.database.DatabaseAPI;
@@ -7,10 +9,8 @@ import net.md_5.bungee.api.AbstractReconnectHandler;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import org.apache.commons.dbutils.handlers.MapListHandler;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class DatabaseReconnectHandler extends AbstractReconnectHandler {
 
@@ -18,19 +18,12 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
 
     public DatabaseReconnectHandler(MN2BungeeBase plugin) {
         this.plugin = plugin;
-        if (plugin.getMainConfig().users_save == true) {
             createTable();
-        }
     }
 
     public void createTable() {
-        if (DatabaseAPI.getMySQLDatabase().isTable("mn2_users") == false) {
-            DatabaseAPI.getMySQLDatabase().createTable("CREATE TABLE IF NOT EXISTS `mn2_users` (" +
-                    " `userUUID` varchar(37) NOT NULL," +
-                    " `lastUserName` varchar(16) NOT NULL," +
-                    " `server` varchar(64) NOT NULL," +
-                    " PRIMARY KEY (`userUUID`)" +
-                    ") ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+        if (DatabaseAPI.getMongoDatabase().collectionExists("mn2_users") == false) {
+            DatabaseAPI.getMongoDatabase().createCollection("mn2_users");
         }
     }
 
@@ -122,16 +115,13 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
 
     @Override
     protected ServerInfo getStoredServer(ProxiedPlayer proxiedPlayer) {
-        if (plugin.getMainConfig().users_save == false) {
-            return null;
-        }
-        ArrayList<Object> beansInfo = DatabaseAPI.getMySQLDatabase().getBeansInfo("select server from mn2_users where userUUID='" + proxiedPlayer.getUniqueId().toString() + "'", new MapListHandler());
-        if (beansInfo.isEmpty()) {
+        DBObject userObject = DatabaseAPI.getMongoDatabase().findOne("mn2_users", new BasicDBObject("userUUID", proxiedPlayer.getUniqueId().toString()));
+        if (userObject == null) {
+            plugin.getLogger().info("No user found for "+proxiedPlayer.getName()+" ("+proxiedPlayer.getUniqueId().toString()+") creating new user.");
             createUser(proxiedPlayer);
             return getStoredServer(proxiedPlayer);
         }
-        Map map = (Map) beansInfo.get(0);
-        String server = (String) map.get("server");
+        String server = (String) userObject.get("Server");
         ArrayList<ServerInfo> serverInfos = new ArrayList<>();
         for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
             if (extendedServerInfo.getServerName().equalsIgnoreCase(server)) {
@@ -140,6 +130,7 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
                 }
             }
         }
+
         if (serverInfos.isEmpty()) {
             return plugin.getProxy().getServerInfo(proxiedPlayer.getPendingConnection().getListener().getDefaultServer());
         }
@@ -149,14 +140,11 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
 
     public void createUser(ProxiedPlayer proxiedPlayer) {
         plugin.getLogger().info("Created user: " + proxiedPlayer.getName());
-        DatabaseAPI.getMySQLDatabase().updateQueryPS("INSERT INTO `mn2_users` (userUUID, lastUserName, server) values (?, ?, ?)", proxiedPlayer.getUniqueId().toString(), proxiedPlayer.getName(), "");
-    }
+        DatabaseAPI.getMongoDatabase().insert("mn2_users",
+                new BasicDBObject("userUUID", proxiedPlayer.getUniqueId().toString()).append("lastUserName", proxiedPlayer.getName()).append("server", ""));}
 
     @Override
     public void setServer(ProxiedPlayer proxiedPlayer) {
-        if (plugin.getMainConfig().users_save == false) {
-            return;
-        }
         ServerInfo serverInfo = proxiedPlayer.getServer().getInfo();
         ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(serverInfo.getName());
         for (String serverName : plugin.getMainConfig().users_serverNames) {
@@ -164,8 +152,8 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
                 return;
             }
         }
-        DatabaseAPI.getMySQLDatabase().updateQueryPS("UPDATE `mn2_users` SET server = ? where userUUID = ?",
-                extendedServerInfo.getServerName(), proxiedPlayer.getUniqueId().toString());
+        DatabaseAPI.getMongoDatabase().updateDocument("mn2_users", new BasicDBObject("userUUID", proxiedPlayer.getUniqueId().toString()),
+                new BasicDBObject("server", extendedServerInfo.getServerName()));
     }
 
     @Override

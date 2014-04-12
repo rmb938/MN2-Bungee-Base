@@ -57,7 +57,7 @@ public class MN2BungeeBase extends Plugin {
             getLogger().info("Internal IP: "+IP);
         }
 
-        DatabaseAPI.initializeMySQL(mainConfig.mySQL_userName, mainConfig.mySQL_password, mainConfig.mySQL_database, mainConfig.mySQL_address, mainConfig.mySQL_port);
+        DatabaseAPI.initializeMongo(mainConfig.mongo_database, mainConfig.mongo_address, mainConfig.mongo_port);
 
         getProxy().setReconnectHandler(new DatabaseReconnectHandler(this));
 
