@@ -153,7 +153,7 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
             }
         }
         DatabaseAPI.getMongoDatabase().updateDocument("mn2_users", new BasicDBObject("userUUID", proxiedPlayer.getUniqueId().toString()),
-                new BasicDBObject("server", extendedServerInfo.getServerName()));
+                new BasicDBObject("$set", new BasicDBObject("server", extendedServerInfo.getServerName())));
     }
 
     @Override
