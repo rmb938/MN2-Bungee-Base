@@ -56,6 +56,7 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         }
         if (server == null) {
             player.disconnect(new TextComponent("Unable to find a server to connect to. Please report"));
+            return null;
         }
         return server;
     }
@@ -130,9 +131,8 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
                 }
             }
         }
-
         if (serverInfos.isEmpty()) {
-            return plugin.getProxy().getServerInfo(proxiedPlayer.getPendingConnection().getListener().getDefaultServer());
+            return null;
         }
         int random = (int) (Math.random() * serverInfos.size());
         return serverInfos.get(random);

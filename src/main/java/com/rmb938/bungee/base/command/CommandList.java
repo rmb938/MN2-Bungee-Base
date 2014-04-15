@@ -7,17 +7,18 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.plugin.Command;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class CommandList extends Command {
+public class CommandList extends ExtendedCommand {
 
     private final MN2BungeeBase plugin;
 
     public CommandList(MN2BungeeBase plugin) {
-        super("glist", "bungeecord.command.list");
+        super(plugin, "glist", "bungeecord.command.list");
+        this.setUsage("/<command>");
+        this.setDescription("Shows a global list of players on this bungee instance");
         this.plugin = plugin;
     }
 

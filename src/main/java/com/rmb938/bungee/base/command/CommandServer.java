@@ -7,34 +7,31 @@ import com.rmb938.bungee.base.MN2BungeeBase;
 import com.rmb938.bungee.base.entity.ExtendedServerInfo;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 
-public class CommandServer extends Command implements TabExecutor {
+public class CommandServer extends ExtendedCommand implements TabExecutor {
 
     private MN2BungeeBase plugin;
 
     public CommandServer(MN2BungeeBase plugin) {
-        super("server", "bungeecord.command.server");
+        super(plugin, "server", "bungeecord.command.server");
+        this.setUsage("/<command> [serverName]");
+        this.setDescription("Shows a list and teleports to servers on the network");
         this.plugin = plugin;
     }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        if (!(sender instanceof ProxiedPlayer)) {
-            return;
-        }
         ProxiedPlayer player = (ProxiedPlayer) sender;
         Map<String, ServerInfo> servers = plugin.getProxy().getServers();
         if (args.length == 0) {
@@ -102,16 +99,17 @@ public class CommandServer extends Command implements TabExecutor {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Iterable<String> onTabComplete(final CommandSender sender, String[] args) {
-        return (args.length != 0) ? Collections.EMPTY_LIST : Iterables.transform(Iterables.filter(ProxyServer.getInstance().getServers().values(), new Predicate<ServerInfo>() {
+        return (args.length != 0) ? Collections.EMPTY_LIST : Iterables.transform(Iterables.filter(ExtendedServerInfo.getExtendedInfos().values(), new Predicate<ExtendedServerInfo>() {
             @Override
-            public boolean apply(ServerInfo input) {
-                return input.canAccess(sender);
+            public boolean apply(ExtendedServerInfo input) {
+                return input.getServerInfo().canAccess(sender);
             }
-        }), new Function<ServerInfo, String>() {
+        }), new Function<ExtendedServerInfo, String>() {
             @Override
-            public String apply(ServerInfo input) {
-                return input.getName();
+            public String apply(ExtendedServerInfo input) {
+                return input.getServerName()+"."+input.getServerId();
             }
         });
     }

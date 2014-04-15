@@ -6,21 +6,21 @@ import com.rmb938.jedis.net.command.bungee.NetCommandBTS;
 import com.rmb938.jedis.net.command.bungee.NetCommandBTSC;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.plugin.Command;
 
 import java.util.concurrent.TimeUnit;
 
-public class CommandStopNode extends Command {
+public class CommandStopNode extends ExtendedCommand {
 
     private final MN2BungeeBase plugin;
 
     public CommandStopNode(MN2BungeeBase plugin) {
-        super("stopnode", "mn2.bungee.stop.node");
+        super(plugin, "stopnode", "mn2.bungee.stop.node");
+        this.setUsage("/<command>");
+        this.setDescription("Stops this specific node on the minecraft network");
         this.plugin = plugin;
     }
 
     public void execute(CommandSender sender, String[] args) {
-
         NetCommandBTSC netCommandBTSC = new NetCommandBTSC("stop", plugin.getIP());
         netCommandBTSC.flush();
 

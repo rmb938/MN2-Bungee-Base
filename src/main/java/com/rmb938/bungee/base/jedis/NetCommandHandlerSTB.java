@@ -5,6 +5,8 @@ import com.rmb938.bungee.base.entity.ExtendedServerInfo;
 import com.rmb938.jedis.net.NetChannel;
 import com.rmb938.jedis.net.NetCommandHandler;
 import com.rmb938.jedis.net.command.bungee.NetCommandBTS;
+import net.md_5.bungee.api.Callback;
+import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.config.ServerInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +46,16 @@ public class NetCommandHandlerSTB extends NetCommandHandler {
                         plugin.getProxy().getServers().put(fromServer, serverInfo);
                         extendedServerInfo = new ExtendedServerInfo(serverInfo, maxPlayers, serverNameInfo[0], Integer.parseInt(serverNameInfo[1]));
                         ExtendedServerInfo.getExtendedInfos().put(fromServer, extendedServerInfo);
+                        serverInfo.ping(new Callback<ServerPing>() {
+                            @Override
+                            public void done(ServerPing serverPing, Throwable throwable) {
+                                if (throwable != null) {
+                                    plugin.getLogger().info("Error");
+                                } else {
+                                    plugin.getLogger().info("Yay");
+                                }
+                            }
+                        });
                     }
                     extendedServerInfo.setCurrentPlayers(currentPlayers);
                     if (extendedServerInfo.getServerId() == -1) {
