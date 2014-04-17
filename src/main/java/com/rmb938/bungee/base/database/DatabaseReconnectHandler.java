@@ -4,6 +4,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.rmb938.bungee.base.MN2BungeeBase;
 import com.rmb938.bungee.base.entity.ExtendedServerInfo;
+import com.rmb938.bungee.base.event.GetStoredEvent;
 import com.rmb938.database.DatabaseAPI;
 import net.md_5.bungee.api.AbstractReconnectHandler;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -33,30 +34,36 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         if (server == null) {
             server = getStoredServer(player);
             if (server == null) {
-                String defaultServer = player.getPendingConnection().getListener().getDefaultServer();
-                ArrayList<ServerInfo> serverInfos = new ArrayList<>();
-                for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
-                    if (extendedServerInfo.getServerName().equalsIgnoreCase(defaultServer)) {
-                        if (player.getServer() != null) {
-                            ExtendedServerInfo extendedServerInfo1 = ExtendedServerInfo.getExtendedInfos().get(player.getServer().getInfo().getName());
-                            if (extendedServerInfo == extendedServerInfo1) {
-                                continue;
-                            }
-                        }
-                        if (extendedServerInfo.getFree() >= 1) {
-                            serverInfos.add(extendedServerInfo.getServerInfo());
-                        }
-                    }
-                }
-                if (serverInfos.isEmpty() == false) {
-                    int random = (int) (Math.random() * serverInfos.size());
-                    server = serverInfos.get(random);
-                }
+                server = getDefault(player);
             }
         }
         if (server == null) {
             player.disconnect(new TextComponent("Unable to find a server to connect to. Please report"));
             return null;
+        }
+        return server;
+    }
+
+    private ServerInfo getDefault(ProxiedPlayer player) {
+        ServerInfo server = null;
+        String defaultServer = player.getPendingConnection().getListener().getDefaultServer();
+        ArrayList<ServerInfo> serverInfos = new ArrayList<>();
+        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
+            if (extendedServerInfo.getServerName().equalsIgnoreCase(defaultServer)) {
+                if (player.getServer() != null) {
+                    ExtendedServerInfo extendedServerInfo1 = ExtendedServerInfo.getExtendedInfos().get(player.getServer().getInfo().getName());
+                    if (extendedServerInfo == extendedServerInfo1) {
+                        continue;
+                    }
+                }
+                if (extendedServerInfo.getFree() >= 1) {
+                    serverInfos.add(extendedServerInfo.getServerInfo());
+                }
+            }
+        }
+        if (serverInfos.isEmpty() == false) {
+            int random = (int) (Math.random() * serverInfos.size());
+            server = serverInfos.get(random);
         }
         return server;
     }
@@ -92,24 +99,8 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
             if (serverInfo1 == null) {
                 serverInfo1 = getStoredServer(player);
             }
-        }
-        if (serverInfo1 == null) {
-            String defaultServer = player.getPendingConnection().getListener().getDefaultServer();
-            ArrayList<ServerInfo> serverInfos = new ArrayList<>();
-            for (ExtendedServerInfo extendedServerInfo1 : ExtendedServerInfo.getExtendedInfos().values()) {
-                 if (extendedServerInfo1 == extendedServerInfo) {
-                    continue;
-                }
-                if (extendedServerInfo.getServerName().equalsIgnoreCase(defaultServer)) {
-                    if (extendedServerInfo1.getFree() >= 1) {
-                        serverInfos.add(extendedServerInfo1.getServerInfo());
-                    }
-                }
-            }
-            if (serverInfos.isEmpty() == false) {
-                int random = (int) (Math.random() * serverInfos.size());
-                serverInfo1 = serverInfos.get(random);
-            }
+        } else {
+            serverInfo1 = getDefault(player);
         }
         return serverInfo1;
     }
@@ -122,6 +113,8 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
             createUser(proxiedPlayer);
             return getStoredServer(proxiedPlayer);
         }
+        GetStoredEvent event = new GetStoredEvent(proxiedPlayer);
+        plugin.getProxy().getPluginManager().callEvent(event);
         String server = (String) userObject.get("Server");
         ArrayList<ServerInfo> serverInfos = new ArrayList<>();
         for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
