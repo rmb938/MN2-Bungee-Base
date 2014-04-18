@@ -45,6 +45,7 @@ public class PlayerListener implements Listener {
             }
         }
         ServerInfo newServer = ((DatabaseReconnectHandler)plugin.getProxy().getReconnectHandler()).getSimilarServer(event.getPlayer(), event.getPlayer().getServer().getInfo());
+        //ServerInfo newServer = ((DatabaseReconnectHandler)plugin.getProxy().getReconnectHandler()).getServer(event.getPlayer());
         if (newServer != null) {
             event.getPlayer().sendMessage(new TextComponent("The server you were on unexpectedly disconnected."));
         } else {

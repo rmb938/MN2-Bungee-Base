@@ -99,8 +99,8 @@ public class MN2BungeeBase extends Plugin {
             public void run() {
                 sendHeartbeat();
                 ArrayList<ExtendedServerInfo> toRemove = new ArrayList<>();
+                Jedis jedis = JedisManager.getJedis();
                 for (ExtendedServerInfo serverInfo : ExtendedServerInfo.getExtendedInfos().values()) {
-                    Jedis jedis = JedisManager.getJedis();
                     String data = jedis.get("server."+serverInfo.getServerName()+"."+serverInfo.getServerId());
                     if (data == null) {
                         toRemove.add(serverInfo);
@@ -114,6 +114,7 @@ public class MN2BungeeBase extends Plugin {
                         e.printStackTrace();
                     }
                 }
+                JedisManager.returnJedis(jedis);
                 for (ExtendedServerInfo serverInfo : toRemove) {
                     final String uuid = serverInfo.getServerInfo().getName();
                     getProxy().getScheduler().schedule(plugin, new Runnable() {

@@ -49,20 +49,23 @@ public class NetCommandHandlerSTB extends NetCommandHandler {
                                 if (throwable != null) {
                                     plugin.getLogger().info("Error");
                                 } else {
-                                    plugin.getLogger().info("Yay");
+                                    plugin.getLogger().info("Yay "+ExtendedServerInfo.getExtendedInfos().get(fromServer).getServerName()+"."+ExtendedServerInfo.getExtendedInfos().get(fromServer).getServerId());
                                 }
                             }
                         });
                     }
                     break;
                 case "removeServer":
+                    //plugin.getLogger().info("Removing "+fromServer);
+                    plugin.getProxy().getServers().remove(fromServer);
+                    //plugin.getLogger().info("Removing Info "+fromServer);
                     plugin.getProxy().getScheduler().schedule(plugin, new Runnable() {
                         @Override
                         public void run() {
                             ExtendedServerInfo.getExtendedInfos().remove(fromServer);
+                            //plugin.getLogger().info("Removed "+fromServer+" "+ExtendedServerInfo.getExtendedInfos().get(fromServer));
                         }
                     }, 10L, TimeUnit.SECONDS);
-                    plugin.getProxy().getServers().remove(fromServer);
                     break;
                 default:
                     break;
