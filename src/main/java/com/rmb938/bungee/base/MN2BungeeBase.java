@@ -92,6 +92,7 @@ public class MN2BungeeBase extends Plugin {
         ExtendedCommand.registerCommand(this, new CommandStopNode(this));
         ExtendedCommand.registerCommand(this, new CommandStopNetwork(this));
         ExtendedCommand.registerCommand(this, new CommandStopType(this));
+        ExtendedCommand.registerCommand(this, new CommandRefreshServerInfo(this));
         final Plugin plugin = this;
         getProxy().getScheduler().schedule(this, new Runnable() {
 
