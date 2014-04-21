@@ -69,6 +69,9 @@ public class CommandServer extends ExtendedCommand implements TabExecutor {
                     serverName = info[0];
                     int id = Integer.parseInt(info[1]);
                     for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
+                        if (extendedServerInfo.getServerName().equalsIgnoreCase(serverName) == false) {
+                            continue;
+                        }
                         if (extendedServerInfo.getServerId() == id) {
                             server = extendedServerInfo.getServerInfo();
                             break;
@@ -78,6 +81,9 @@ public class CommandServer extends ExtendedCommand implements TabExecutor {
                     ArrayList<ExtendedServerInfo> extendedServerInfos = ExtendedServerInfo.getExtendedInfos(info[0]);
                     ArrayList<ServerInfo> serverInfos = new ArrayList<>();
                     for (ExtendedServerInfo extendedServerInfo : extendedServerInfos) {
+                        if (extendedServerInfo.getServerName().equalsIgnoreCase(serverName) == false) {
+                            continue;
+                        }
                         if (extendedServerInfo.getFree() > 1) {
                             serverInfos.add(extendedServerInfo.getServerInfo());
                         }

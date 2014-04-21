@@ -15,12 +15,15 @@ import com.rmb938.jedis.JedisManager;
 import com.rmb938.jedis.net.command.bungee.NetCommandBTSC;
 import net.cubespace.Yamler.Config.InvalidConfigurationException;
 import net.md_5.bungee.api.config.ListenerInfo;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.json.JSONException;
 import org.json.JSONObject;
 import redis.clients.jedis.Jedis;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -44,15 +47,34 @@ public class MN2BungeeBase extends Plugin {
             mainConfig.init();
             mainConfig.save();
         } catch (InvalidConfigurationException e) {
-            getLogger().log(Level.SEVERE, null ,e);
+            getLogger().log(Level.SEVERE, null, e);
             return;
         }
 
-        DatabaseAPI.initializeMongo(mainConfig.mongo_database, mainConfig.mongo_address, mainConfig.mongo_port);
+        getProxy().getServers().clear();
+
+        try {
+            for (String manualString : mainConfig.manualServers) {
+                String[] split = manualString.split("/");
+                String[] connection = split[1].split(":");
+                UUID uuid = UUID.randomUUID();
+                ServerInfo serverInfo = getProxy().constructServerInfo(uuid.toString(), new InetSocketAddress(connection[0], Integer.parseInt(connection[1])), "", false);
+                ExtendedServerInfo extendedServerInfo = new ExtendedServerInfo(serverInfo, 100, split[0], 1);
+                ExtendedServerInfo.getExtendedInfos().put(uuid.toString(), extendedServerInfo);
+                getProxy().getServers().put(uuid.toString(), serverInfo);
+            }
+        } catch (Exception e) {
+            getLogger().log(Level.SEVERE, null, e);
+        }
+        try {
+            DatabaseAPI.initializeMongo(mainConfig.mongo_database, mainConfig.mongo_address, mainConfig.mongo_port);
+        } catch (Exception e) {
+            getLogger().warning("Unable to connect to mongo. Closing");
+            getProxy().stop();
+            return;
+        }
 
         getProxy().setReconnectHandler(new DatabaseReconnectHandler(this));
-
-        getProxy().getServers().clear();
 
         JedisManager.connectToRedis(mainConfig.redis_address);
         JedisManager.setUpDelegates();
@@ -60,10 +82,10 @@ public class MN2BungeeBase extends Plugin {
         try {
             Jedis jedis = JedisManager.getJedis();
             for (ListenerInfo listenerInfo : getProxy().getConfig().getListeners()) {
-                IP = jedis.get(listenerInfo.getHost().getAddress().getHostAddress()+":bungee");
-                jedis.del(listenerInfo.getHost().getAddress().getHostAddress()+":bungee");
+                IP = jedis.get(listenerInfo.getHost().getAddress().getHostAddress() + ":bungee");
+                jedis.del(listenerInfo.getHost().getAddress().getHostAddress() + ":bungee");
             }
-            getLogger().info("IP: "+IP);
+            getLogger().info("IP: " + IP);
             JedisManager.returnJedis(jedis);
         } catch (Exception e) {
             getLogger().warning("Unable to connect to redis. Closing");
@@ -75,7 +97,7 @@ public class MN2BungeeBase extends Plugin {
             getLogger().severe("Error starting server. Unknown internal IP address.");
             getProxy().stop();
         } else {
-            getLogger().info("Internal IP: "+IP);
+            getLogger().info("Internal IP: " + IP);
         }
 
 
@@ -102,7 +124,7 @@ public class MN2BungeeBase extends Plugin {
                 ArrayList<ExtendedServerInfo> toRemove = new ArrayList<>();
                 Jedis jedis = JedisManager.getJedis();
                 for (ExtendedServerInfo serverInfo : ExtendedServerInfo.getExtendedInfos().values()) {
-                    String data = jedis.get("server."+serverInfo.getServerName()+"."+serverInfo.getServerId());
+                    String data = jedis.get("server." + serverInfo.getServerName() + "." + serverInfo.getServerId());
                     if (data == null) {
                         toRemove.add(serverInfo);
                         continue;

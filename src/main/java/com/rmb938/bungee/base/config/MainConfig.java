@@ -41,6 +41,11 @@ public class MainConfig extends Config {
     @Comment("The database name for the mongo server")
     public String mongo_database = "minecraft";
 
+    @Comment("A list of server names, IP addresses and ports to ALWAYS add to the bungee server list")
+    public ArrayList<String> manualServers = new ArrayList<String>() {{
+        add("manual1/192.168.1.1:96487");
+        add("manual2/192.168.1.1:98745");
+    }};
 
 
 }
