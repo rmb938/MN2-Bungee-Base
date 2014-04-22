@@ -21,15 +21,15 @@ public class CommandStopNetwork extends ExtendedCommand {
     }
 
     public void execute(CommandSender sender, String[] args) {
-        NetCommandBTSC netCommandBTSC = new NetCommandBTSC("stop", "*");
+        NetCommandBTSC netCommandBTSC = new NetCommandBTSC("stop", plugin.getPublicIP());
         netCommandBTSC.flush();
 
         plugin.getProxy().getScheduler().schedule(plugin, new Runnable() {
             @Override
             public void run() {
-                NetCommandBTS netCommandBTS = new NetCommandBTS("shutdown", plugin.getIP(), "*");
+                NetCommandBTS netCommandBTS = new NetCommandBTS("shutdown", plugin.getPrivateIP(), "*");
                 netCommandBTS.flush();
-                NetCommandBTB netCommandBTB = new NetCommandBTB("stop", plugin.getIP(), "*");
+                NetCommandBTB netCommandBTB = new NetCommandBTB("stop", plugin.getPrivateIP(), "*");
                 netCommandBTB.flush();
             }
         }, 10, TimeUnit.SECONDS);

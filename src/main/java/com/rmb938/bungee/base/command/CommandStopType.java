@@ -30,7 +30,7 @@ public class CommandStopType extends ExtendedCommand {
             plugin.getProxy().getScheduler().schedule(plugin, new Runnable() {
                 @Override
                 public void run() {
-                    NetCommandBTB netCommandBTB = new NetCommandBTB("stop", plugin.getIP(), "*");
+                    NetCommandBTB netCommandBTB = new NetCommandBTB("stop", plugin.getPrivateIP(), "*");
                     netCommandBTB.flush();
                 }
             }, 10, TimeUnit.SECONDS);
@@ -42,7 +42,7 @@ public class CommandStopType extends ExtendedCommand {
             public void run() {
                 for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
                     if (extendedServerInfo.getServerName().equalsIgnoreCase(serverType)) {
-                        NetCommandBTS netCommandBTS = new NetCommandBTS("shutdown", plugin.getIP(), extendedServerInfo.getServerInfo().getName());
+                        NetCommandBTS netCommandBTS = new NetCommandBTS("shutdown", plugin.getPrivateIP(), extendedServerInfo.getServerInfo().getName());
                         netCommandBTS.flush();
                     }
                 }

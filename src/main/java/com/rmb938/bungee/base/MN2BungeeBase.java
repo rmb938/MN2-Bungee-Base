@@ -12,7 +12,6 @@ import com.rmb938.bungee.base.listeners.PluginListener;
 import com.rmb938.bungee.base.utils.help.SimpleHelpMap;
 import com.rmb938.database.DatabaseAPI;
 import com.rmb938.jedis.JedisManager;
-import com.rmb938.jedis.net.command.bungee.NetCommandBTSC;
 import net.cubespace.Yamler.Config.InvalidConfigurationException;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -30,7 +29,8 @@ import java.util.logging.Level;
 public class MN2BungeeBase extends Plugin {
 
     private MainConfig mainConfig;
-    private String IP;
+    private String privateIP;
+    private String publicIP;
     private SimpleHelpMap helpMap;
 
     @Override
@@ -82,10 +82,12 @@ public class MN2BungeeBase extends Plugin {
         try {
             Jedis jedis = JedisManager.getJedis();
             for (ListenerInfo listenerInfo : getProxy().getConfig().getListeners()) {
-                IP = jedis.get(listenerInfo.getHost().getAddress().getHostAddress() + ":bungee");
-                jedis.del(listenerInfo.getHost().getAddress().getHostAddress() + ":bungee");
+                String data =  jedis.get(listenerInfo.getHost().getAddress().getHostAddress() + ":bungee");
+                JSONObject jsonObject = new JSONObject(data);
+                publicIP = listenerInfo.getHost().getAddress().getHostAddress();
+                privateIP = jsonObject.getString("privateIP");
             }
-            getLogger().info("IP: " + IP);
+            getLogger().info("privateIP: " + privateIP);
             JedisManager.returnJedis(jedis);
         } catch (Exception e) {
             getLogger().warning("Unable to connect to redis. Closing");
@@ -93,11 +95,11 @@ public class MN2BungeeBase extends Plugin {
             return;
         }
 
-        if (IP == null) {
-            getLogger().severe("Error starting server. Unknown internal IP address.");
+        if (privateIP == null) {
+            getLogger().severe("Error starting server. Unknown private IP address.");
             getProxy().stop();
         } else {
-            getLogger().info("Internal IP: " + IP);
+            getLogger().info("Private IP: " + privateIP);
         }
 
 
@@ -154,15 +156,22 @@ public class MN2BungeeBase extends Plugin {
 
     @Override
     public void onDisable() {
+        Jedis jedis = JedisManager.getJedis();
+        jedis.del(publicIP + ":bungee");
+        JedisManager.returnJedis(jedis);
         JedisManager.shutDown();
+    }
+
+    public String getPublicIP() {
+        return publicIP;
     }
 
     public SimpleHelpMap getHelpMap() {
         return helpMap;
     }
 
-    public String getIP() {
-        return IP;
+    public String getPrivateIP() {
+        return privateIP;
     }
 
     public MainConfig getMainConfig() {
@@ -170,7 +179,16 @@ public class MN2BungeeBase extends Plugin {
     }
 
     private void sendHeartbeat() {
-        NetCommandBTSC netCommandBTSC = new NetCommandBTSC("heartbeat", IP);
-        netCommandBTSC.flush();
+        Jedis jedis = JedisManager.getJedis();
+        String data =  jedis.get(publicIP + ":bungee");
+        try {
+            JSONObject jsonObject = new JSONObject(data);
+            jsonObject.put("currentPlayers", getProxy().getPlayers().size());
+            jedis.set(publicIP+":bungee", jsonObject.toString());
+            jedis.expire(publicIP+":bungee", 60);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        JedisManager.returnJedis(jedis);
     }
 }

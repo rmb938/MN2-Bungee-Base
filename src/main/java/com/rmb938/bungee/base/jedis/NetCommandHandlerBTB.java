@@ -25,7 +25,7 @@ public class NetCommandHandlerBTB extends NetCommandHandler {
             String toBungee = jsonObject.getString("to");
 
             if (toBungee.equalsIgnoreCase("*") == false) {
-                if (toBungee.equalsIgnoreCase(plugin.getIP()) == false) {
+                if (toBungee.equalsIgnoreCase(plugin.getPrivateIP()) == false) {
                     return;
                 }
             }
