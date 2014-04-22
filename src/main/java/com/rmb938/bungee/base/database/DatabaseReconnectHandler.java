@@ -129,9 +129,11 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
                 }
             } else {
                 serverInfo1 = getDefault(player);
-                ExtendedServerInfo extendedServerInfo1 = ExtendedServerInfo.getExtendedInfos().get(serverInfo1.getName());
-                if (extendedServerInfo == extendedServerInfo1) {
-                    serverInfo1 = findNameIgnoreSame(extendedServerInfo);
+                if (serverInfo1 != null) {
+                    ExtendedServerInfo extendedServerInfo1 = ExtendedServerInfo.getExtendedInfos().get(serverInfo1.getName());
+                    if (extendedServerInfo == extendedServerInfo1) {
+                        serverInfo1 = findNameIgnoreSame(extendedServerInfo);
+                    }
                 }
             }
         }

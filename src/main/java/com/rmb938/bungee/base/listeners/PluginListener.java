@@ -34,9 +34,8 @@ public class PluginListener implements Listener {
                 if (subchannel.equalsIgnoreCase("connect")) {
                     String[] info = in.readUTF().split("\\.");
                     if (info.length == 1) {
-                        ArrayList<ExtendedServerInfo> extendedServerInfos = ExtendedServerInfo.getExtendedInfos(info[0]);
                         ArrayList<ServerInfo> serverInfos = new ArrayList<>();
-                        for (ExtendedServerInfo extendedServerInfo : extendedServerInfos) {
+                        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos(info[0])) {
                             if (extendedServerInfo.getFree() > 1) {
                                 serverInfos.add(extendedServerInfo.getServerInfo());
                             }
@@ -48,7 +47,7 @@ public class PluginListener implements Listener {
                         }
                     } else if (info.length == 2) {
                         int id = Integer.parseInt(info[1]);
-                        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
+                        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos(info[0])) {
                             if (extendedServerInfo.getServerId() == id) {
                                 ProxiedPlayer player = (ProxiedPlayer) event.getReceiver();
                                 player.connect(extendedServerInfo.getServerInfo());
