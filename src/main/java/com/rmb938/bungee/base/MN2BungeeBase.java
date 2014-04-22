@@ -162,6 +162,20 @@ public class MN2BungeeBase extends Plugin {
         JedisManager.shutDown();
     }
 
+    public static ServerInfo getRandomServer(String serverType) {
+        ArrayList<ServerInfo> serverInfos = new ArrayList<>();
+        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos(serverType)) {
+            if (extendedServerInfo.getFree() > 1) {
+                serverInfos.add(extendedServerInfo.getServerInfo());
+            }
+        }
+        if (serverInfos.isEmpty() == false) {
+            int random = (int) (Math.random() * serverInfos.size());
+            return serverInfos.get(random);
+        }
+        return null;
+    }
+
     public String getPublicIP() {
         return publicIP;
     }
