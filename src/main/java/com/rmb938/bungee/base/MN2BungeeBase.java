@@ -4,6 +4,7 @@ import com.rmb938.bungee.base.command.*;
 import com.rmb938.bungee.base.config.MainConfig;
 import com.rmb938.bungee.base.database.DatabaseReconnectHandler;
 import com.rmb938.bungee.base.entity.ExtendedServerInfo;
+import com.rmb938.bungee.base.entity.ManualESI;
 import com.rmb938.bungee.base.jedis.NetCommandHandlerBTB;
 import com.rmb938.bungee.base.jedis.NetCommandHandlerSCTB;
 import com.rmb938.bungee.base.jedis.NetCommandHandlerSTB;
@@ -59,7 +60,7 @@ public class MN2BungeeBase extends Plugin {
                 String[] connection = split[1].split(":");
                 UUID uuid = UUID.randomUUID();
                 ServerInfo serverInfo = getProxy().constructServerInfo(uuid.toString(), new InetSocketAddress(connection[0], Integer.parseInt(connection[1])), "", false);
-                ExtendedServerInfo extendedServerInfo = new ExtendedServerInfo(serverInfo, 100, split[0], 1);
+                ManualESI extendedServerInfo = new ManualESI(serverInfo, 100, split[0], 1);
                 ExtendedServerInfo.getExtendedInfos().put(uuid.toString(), extendedServerInfo);
                 getProxy().getServers().put(uuid.toString(), serverInfo);
             }
@@ -116,7 +117,9 @@ public class MN2BungeeBase extends Plugin {
         ExtendedCommand.registerCommand(this, new CommandStopNode(this));
         ExtendedCommand.registerCommand(this, new CommandStopNetwork(this));
         ExtendedCommand.registerCommand(this, new CommandStopType(this));
+        ExtendedCommand.registerCommand(this, new CommandSend(this));
         ExtendedCommand.registerCommand(this, new CommandRefreshServerInfo(this));
+
         final Plugin plugin = this;
         getProxy().getScheduler().schedule(this, new Runnable() {
 
@@ -126,6 +129,9 @@ public class MN2BungeeBase extends Plugin {
                 ArrayList<ExtendedServerInfo> toRemove = new ArrayList<>();
                 Jedis jedis = JedisManager.getJedis();
                 for (ExtendedServerInfo serverInfo : ExtendedServerInfo.getExtendedInfos().values()) {
+                    if (serverInfo instanceof ManualESI) {
+                        continue;
+                    }
                     String data = jedis.get("server." + serverInfo.getServerName() + "." + serverInfo.getServerId());
                     if (data == null) {
                         toRemove.add(serverInfo);

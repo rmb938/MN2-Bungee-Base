@@ -3,6 +3,7 @@ package com.rmb938.bungee.base.listeners;
 import com.rmb938.bungee.base.MN2BungeeBase;
 import com.rmb938.bungee.base.database.DatabaseReconnectHandler;
 import com.rmb938.bungee.base.entity.ExtendedServerInfo;
+import com.rmb938.bungee.base.entity.ManualESI;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -25,6 +26,9 @@ public class PlayerListener implements Listener {
         int max = 0;
         int online = 0;
         for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
+            if (extendedServerInfo instanceof ManualESI) {
+                continue;
+            }
             max += extendedServerInfo.getMaxPlayers();
             online += extendedServerInfo.getCurrentPlayers();
         }

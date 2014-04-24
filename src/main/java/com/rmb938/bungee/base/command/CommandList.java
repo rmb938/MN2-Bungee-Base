@@ -42,5 +42,6 @@ public class CommandList extends ExtendedCommand {
             online += extendedServerInfo.getCurrentPlayers();
         }
         sender.sendMessage(plugin.getProxy().getTranslation("total_players", new Object[]{online}));
+        sender.sendMessage("Players on this Bungee: "+plugin.getProxy().getPlayers().size());
     }
 }

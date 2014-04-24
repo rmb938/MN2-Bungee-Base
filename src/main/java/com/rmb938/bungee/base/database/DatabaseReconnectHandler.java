@@ -4,11 +4,13 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.rmb938.bungee.base.MN2BungeeBase;
 import com.rmb938.bungee.base.entity.ExtendedServerInfo;
+import com.rmb938.bungee.base.entity.ManualESI;
 import com.rmb938.bungee.base.event.GetStoredEvent;
 import com.rmb938.database.DatabaseAPI;
 import net.md_5.bungee.api.AbstractReconnectHandler;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.ArrayList;
@@ -19,7 +21,7 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
 
     public DatabaseReconnectHandler(MN2BungeeBase plugin) {
         this.plugin = plugin;
-            createTable();
+        createTable();
     }
 
     public void createTable() {
@@ -30,7 +32,7 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
 
     @Override
     public ServerInfo getServer(ProxiedPlayer player) {
-        ServerInfo server = getForcedHost(player.getPendingConnection());
+        ServerInfo server = DatabaseReconnectHandler.getForcedHost(player.getPendingConnection());
         if (server == null) {
             server = getStoredServer(player);
             if (server == null) {
@@ -44,15 +46,42 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         return server;
     }
 
+
+    public static ServerInfo getForcedHost(PendingConnection con) {
+        if (con.getVirtualHost() == null) {
+            return null;
+        }
+
+        String forced = con.getListener().getForcedHosts().get(con.getVirtualHost().getHostString());
+
+        if (forced == null && con.getListener().isForceDefault()) {
+            forced = con.getListener().getDefaultServer();
+        }
+        ServerInfo serverInfo = null;
+        ArrayList<ServerInfo> serverInfos = new ArrayList<>();
+        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
+            if (extendedServerInfo.getServerName().equalsIgnoreCase(forced)) {
+                if (extendedServerInfo.getFree() >= 1) {
+                    serverInfos.add(extendedServerInfo.getServerInfo());
+                }
+            }
+        }
+        if (serverInfos.isEmpty() == false) {
+            int random = (int) (Math.random() * serverInfos.size());
+            serverInfo = serverInfos.get(random);
+        }
+        return serverInfo;
+    }
+
     private ServerInfo getDefault(ProxiedPlayer player) {
         ServerInfo server = null;
         String defaultServer = player.getPendingConnection().getListener().getDefaultServer();
         ArrayList<ServerInfo> serverInfos = new ArrayList<>();
         for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
-            if (plugin.getProxy().getServers().get(extendedServerInfo.getServerInfo().getName()) == null) {
-                continue;
-            }
             if (extendedServerInfo.getServerName().equalsIgnoreCase(defaultServer)) {
+                if (plugin.getProxy().getServers().get(extendedServerInfo.getServerInfo().getName()) == null) {
+                    continue;
+                }
                 if (player.getServer() != null) {
                     ExtendedServerInfo extendedServerInfo1 = ExtendedServerInfo.getExtendedInfos().get(player.getServer().getInfo().getName());
                     if (extendedServerInfo == extendedServerInfo1) {
@@ -144,7 +173,7 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
     protected ServerInfo getStoredServer(ProxiedPlayer proxiedPlayer) {
         DBObject userObject = DatabaseAPI.getMongoDatabase().findOne("mn2_users", new BasicDBObject("userUUID", proxiedPlayer.getUniqueId().toString()));
         if (userObject == null) {
-            plugin.getLogger().info("No user found for "+proxiedPlayer.getName()+" ("+proxiedPlayer.getUniqueId().toString()+") creating new user.");
+            plugin.getLogger().info("No user found for " + proxiedPlayer.getName() + " (" + proxiedPlayer.getUniqueId().toString() + ") creating new user.");
             createUser(proxiedPlayer);
             return getStoredServer(proxiedPlayer);
         }
@@ -153,6 +182,9 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         String server = (String) userObject.get("server");
         ArrayList<ServerInfo> serverInfos = new ArrayList<>();
         for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
+            if (extendedServerInfo instanceof ManualESI) {
+                continue;
+            }
             if (plugin.getProxy().getServers().get(extendedServerInfo.getServerInfo().getName()) == null) {
                 continue;
             }
@@ -174,12 +206,16 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
     public void createUser(ProxiedPlayer proxiedPlayer) {
         plugin.getLogger().info("Created user: " + proxiedPlayer.getName());
         DatabaseAPI.getMongoDatabase().insert("mn2_users",
-                new BasicDBObject("userUUID", proxiedPlayer.getUniqueId().toString()).append("lastUserName", proxiedPlayer.getName()).append("server", ""));}
+                new BasicDBObject("userUUID", proxiedPlayer.getUniqueId().toString()).append("lastUserName", proxiedPlayer.getName()).append("server", ""));
+    }
 
     @Override
     public void setServer(ProxiedPlayer proxiedPlayer) {
         ServerInfo serverInfo = proxiedPlayer.getServer().getInfo();
         ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(serverInfo.getName());
+        if (extendedServerInfo instanceof ManualESI) {
+            return;
+        }
         for (String serverName : plugin.getMainConfig().users_serverNames) {
             if (extendedServerInfo.getServerName().startsWith(serverName)) {
                 return;

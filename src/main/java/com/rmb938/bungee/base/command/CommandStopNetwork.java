@@ -21,8 +21,13 @@ public class CommandStopNetwork extends ExtendedCommand {
     }
 
     public void execute(CommandSender sender, String[] args) {
-        NetCommandBTSC netCommandBTSC = new NetCommandBTSC("stop", plugin.getPublicIP());
-        netCommandBTSC.flush();
+        plugin.getProxy().getScheduler().schedule(plugin, new Runnable() {
+            @Override
+            public void run() {
+                NetCommandBTSC netCommandBTSC = new NetCommandBTSC("stop", "*");
+                netCommandBTSC.flush();
+            }
+        }, 1L, 1L, TimeUnit.SECONDS);
 
         plugin.getProxy().getScheduler().schedule(plugin, new Runnable() {
             @Override
