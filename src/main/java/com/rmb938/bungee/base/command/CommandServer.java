@@ -32,6 +32,9 @@ public class CommandServer extends ExtendedCommand implements TabExecutor {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+        if (this.testPermission(sender) == false) {
+            return;
+        }
         ProxiedPlayer player = (ProxiedPlayer) sender;
         Map<String, ServerInfo> servers = plugin.getProxy().getServers();
         if (args.length == 0) {

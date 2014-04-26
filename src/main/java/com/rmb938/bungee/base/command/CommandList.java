@@ -23,6 +23,9 @@ public class CommandList extends ExtendedCommand {
     }
 
     public void execute(CommandSender sender, String[] args) {
+        if (this.testPermission(sender) == false) {
+            return;
+        }
         for (ServerInfo server : plugin.getProxy().getServers().values()) {
             if (server.canAccess(sender)) {
                 ArrayList<String> players = new ArrayList<>();
@@ -42,6 +45,7 @@ public class CommandList extends ExtendedCommand {
             online += extendedServerInfo.getCurrentPlayers();
         }
         sender.sendMessage(plugin.getProxy().getTranslation("total_players", new Object[]{online}));
+        sender.sendMessage("You are on bungee: "+plugin.getPrivateIP());
         sender.sendMessage("Players on this Bungee: "+plugin.getProxy().getPlayers().size());
     }
 }

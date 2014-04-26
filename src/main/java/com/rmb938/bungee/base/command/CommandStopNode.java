@@ -21,6 +21,9 @@ public class CommandStopNode extends ExtendedCommand {
     }
 
     public void execute(CommandSender sender, String[] args) {
+        if (this.testPermission(sender) == false) {
+            return;
+        }
         plugin.getProxy().getScheduler().schedule(plugin, new Runnable() {
             @Override
             public void run() {

@@ -33,6 +33,7 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
     @Override
     public ServerInfo getServer(ProxiedPlayer player) {
         ServerInfo server = DatabaseReconnectHandler.getForcedHost(player.getPendingConnection());
+        plugin.getLogger().info("Forced Host: "+server);
         if (server == null) {
             server = getStoredServer(player);
             if (server == null) {
@@ -171,6 +172,7 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
 
     @Override
     protected ServerInfo getStoredServer(ProxiedPlayer proxiedPlayer) {
+        plugin.getLogger().info("Getting Server for "+proxiedPlayer.getName());
         DBObject userObject = DatabaseAPI.getMongoDatabase().findOne("mn2_users", new BasicDBObject("userUUID", proxiedPlayer.getUniqueId().toString()));
         if (userObject == null) {
             plugin.getLogger().info("No user found for " + proxiedPlayer.getName() + " (" + proxiedPlayer.getUniqueId().toString() + ") creating new user.");
@@ -180,6 +182,7 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         GetStoredEvent event = new GetStoredEvent(proxiedPlayer);
         plugin.getProxy().getPluginManager().callEvent(event);
         String server = (String) userObject.get("server");
+        plugin.getLogger().info("Got Server "+server+" for "+proxiedPlayer.getName());
         ArrayList<ServerInfo> serverInfos = new ArrayList<>();
         for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
             if (extendedServerInfo instanceof ManualESI) {
@@ -210,9 +213,9 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
     }
 
     @Override
-    public void setServer(ProxiedPlayer proxiedPlayer) {
+    public void setServer(final ProxiedPlayer proxiedPlayer) {
         ServerInfo serverInfo = proxiedPlayer.getServer().getInfo();
-        ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(serverInfo.getName());
+        final ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(serverInfo.getName());
         if (extendedServerInfo instanceof ManualESI) {
             return;
         }
@@ -221,8 +224,13 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
                 return;
             }
         }
-        DatabaseAPI.getMongoDatabase().updateDocument("mn2_users", new BasicDBObject("userUUID", proxiedPlayer.getUniqueId().toString()),
-                new BasicDBObject("$set", new BasicDBObject("server", extendedServerInfo.getServerName())));
+        plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
+            @Override
+            public void run() {
+                DatabaseAPI.getMongoDatabase().updateDocument("mn2_users", new BasicDBObject("userUUID", proxiedPlayer.getUniqueId().toString()),
+                        new BasicDBObject("$set", new BasicDBObject("server", extendedServerInfo.getServerName())));
+            }
+        });
     }
 
     @Override

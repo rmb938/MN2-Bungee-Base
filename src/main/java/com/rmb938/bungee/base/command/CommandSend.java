@@ -26,6 +26,9 @@ public class CommandSend extends ExtendedCommand implements TabExecutor {
     }
 
     public void execute(CommandSender sender, String[] args) {
+        if (this.testPermission(sender) == false) {
+            return;
+        }
         if (args.length != 2) {
             sender.sendMessage(ChatColor.RED + "Not enough arguments, usage: /send <player|all|current> <target>");
             return;

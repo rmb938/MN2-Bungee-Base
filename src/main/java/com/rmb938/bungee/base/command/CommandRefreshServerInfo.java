@@ -17,6 +17,9 @@ public class CommandRefreshServerInfo  extends ExtendedCommand {
     }
 
     public void execute(CommandSender sender, String[] args) {
+        if (this.testPermission(sender) == false) {
+            return;
+        }
         NetCommandBTSC netCommandBTSC = new NetCommandBTSC("refreshServerTypes", "*");
         netCommandBTSC.flush();
         sender.sendMessage(new TextComponent("Refreshing server into..."));

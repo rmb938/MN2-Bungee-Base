@@ -24,6 +24,9 @@ public class CommandHelp  extends ExtendedCommand {
 
     @Override
     public void execute(CommandSender sender, String[] strings) {
+        if (this.testPermission(sender) == false) {
+            return;
+        }
         String command;
         int pageNumber;
         int pageHeight;

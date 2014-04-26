@@ -21,6 +21,9 @@ public class CommandStopType extends ExtendedCommand {
     }
 
     public void execute(CommandSender sender, String[] args) {
+        if (this.testPermission(sender) == false) {
+            return;
+        }
         if (args.length != 1) {
             sender.sendMessage(new TextComponent("Usage: /stoptype [serverType]"));
             return;

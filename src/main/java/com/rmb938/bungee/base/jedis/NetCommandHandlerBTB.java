@@ -3,6 +3,8 @@ package com.rmb938.bungee.base.jedis;
 import com.rmb938.bungee.base.MN2BungeeBase;
 import com.rmb938.jedis.net.NetChannel;
 import com.rmb938.jedis.net.NetCommandHandler;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,6 +37,10 @@ public class NetCommandHandlerBTB extends NetCommandHandler {
             switch (command) {
                 case "stop":
                     plugin.getProxy().stop();
+                    break;
+                case "galert":
+                    String message = (String) objectHashMap.get("message");
+                    plugin.getProxy().broadcast(new TextComponent(ChatColor.GRAY + "[" + ChatColor.DARK_RED + "Global Alert" + ChatColor.GRAY + "]" + ChatColor.RED + message));
                     break;
                 default:
                     break;
