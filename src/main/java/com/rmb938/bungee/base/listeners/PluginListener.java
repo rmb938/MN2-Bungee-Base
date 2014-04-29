@@ -71,6 +71,25 @@ public class PluginListener implements Listener {
                     ProxiedPlayer player = (ProxiedPlayer) event.getReceiver();
                     player.getServer().sendData("BungeeCord", byteArray.toByteArray());
                     event.setCancelled(true);
+                } else if (subchannel.equalsIgnoreCase("getHighestOfType")) {
+                    String type = in.readUTF();
+                    int amount = 0;
+
+                    for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos(type)) {
+                        amount = Math.max(amount, extendedServerInfo.getServerId());
+                    }
+
+                    ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+                    DataOutputStream out = new DataOutputStream(byteArray);
+
+                    out.writeUTF("getHighestOfType");
+                    out.writeUTF(type);
+                    out.writeInt(amount);
+                    out.flush();
+
+                    ProxiedPlayer player = (ProxiedPlayer) event.getReceiver();
+                    player.getServer().sendData("BungeeCord", byteArray.toByteArray());
+                    event.setCancelled(true);
                 }
             } catch (IOException e) {
                 plugin.getLogger().log(Level.SEVERE, null, e);

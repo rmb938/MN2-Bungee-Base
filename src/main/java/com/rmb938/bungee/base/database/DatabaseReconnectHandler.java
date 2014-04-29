@@ -33,7 +33,7 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
     @Override
     public ServerInfo getServer(ProxiedPlayer player) {
         ServerInfo server = DatabaseReconnectHandler.getForcedHost(player.getPendingConnection());
-        plugin.getLogger().info("Forced Host: "+server);
+        plugin.getLogger().info("Forced Host: " + server);
         if (server == null) {
             server = getStoredServer(player);
             if (server == null) {
@@ -172,7 +172,6 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
 
     @Override
     protected ServerInfo getStoredServer(ProxiedPlayer proxiedPlayer) {
-        plugin.getLogger().info("Getting Server for "+proxiedPlayer.getName());
         DBObject userObject = DatabaseAPI.getMongoDatabase().findOne("mn2_users", new BasicDBObject("userUUID", proxiedPlayer.getUniqueId().toString()));
         if (userObject == null) {
             plugin.getLogger().info("No user found for " + proxiedPlayer.getName() + " (" + proxiedPlayer.getUniqueId().toString() + ") creating new user.");
@@ -182,7 +181,6 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         GetStoredEvent event = new GetStoredEvent(proxiedPlayer);
         plugin.getProxy().getPluginManager().callEvent(event);
         String server = (String) userObject.get("server");
-        plugin.getLogger().info("Got Server "+server+" for "+proxiedPlayer.getName());
         ArrayList<ServerInfo> serverInfos = new ArrayList<>();
         for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
             if (extendedServerInfo instanceof ManualESI) {

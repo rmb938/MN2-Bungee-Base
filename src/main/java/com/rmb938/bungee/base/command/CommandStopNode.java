@@ -24,13 +24,8 @@ public class CommandStopNode extends ExtendedCommand {
         if (this.testPermission(sender) == false) {
             return;
         }
-        plugin.getProxy().getScheduler().schedule(plugin, new Runnable() {
-            @Override
-            public void run() {
                 NetCommandBTSC netCommandBTSC = new NetCommandBTSC("stop", plugin.getPrivateIP());
                 netCommandBTSC.flush();
-            }
-        }, 1L, 1L, TimeUnit.SECONDS);
 
         plugin.getProxy().getScheduler().schedule(plugin, new Runnable() {
             @Override
