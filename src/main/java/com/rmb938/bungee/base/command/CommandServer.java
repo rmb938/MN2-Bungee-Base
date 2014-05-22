@@ -72,9 +72,6 @@ public class CommandServer extends ExtendedCommand implements TabExecutor {
                     serverName = info[0];
                     int id = Integer.parseInt(info[1]);
                     for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos(info[0])) {
-                        if (extendedServerInfo.getServerName().equalsIgnoreCase(serverName) == false) {
-                            continue;
-                        }
                         if (extendedServerInfo.getServerId() == id) {
                             server = extendedServerInfo.getServerInfo();
                             break;

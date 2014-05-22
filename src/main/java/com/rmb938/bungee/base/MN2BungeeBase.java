@@ -140,6 +140,11 @@ public class MN2BungeeBase extends Plugin {
                     }
                     try {
                         JSONObject jsonObject = new JSONObject(data);
+                        String uuid = jsonObject.getString("uuid");
+                        if (uuid.equals(serverInfo.getServerInfo().getName()) == false) {
+                            toRemove.add(serverInfo);
+                            continue;
+                        }
                         int currentPlayers = jsonObject.getInt("currentPlayers");
                         serverInfo.setCurrentPlayers(currentPlayers);
                     } catch (JSONException e) {

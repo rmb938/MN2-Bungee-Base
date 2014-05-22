@@ -36,13 +36,14 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         plugin.getLogger().info("Forced Host: " + server);
         if (server == null) {
             server = getStoredServer(player);
+            plugin.getLogger().info("Stored Host: " + server);
             if (server == null) {
                 server = getDefault(player);
+                plugin.getLogger().info("Default Host: " + server);
             }
         }
         if (server == null) {
             player.disconnect(new TextComponent("Unable to find a server to connect to. Please report"));
-            return null;
         }
         return server;
     }
@@ -58,73 +59,39 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         if (forced == null && con.getListener().isForceDefault()) {
             forced = con.getListener().getDefaultServer();
         }
-        ServerInfo serverInfo = null;
-        ArrayList<ServerInfo> serverInfos = new ArrayList<>();
-        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
-            if (extendedServerInfo.getServerName().equalsIgnoreCase(forced)) {
-                if (extendedServerInfo.getFree() >= 1) {
-                    serverInfos.add(extendedServerInfo.getServerInfo());
-                }
-            }
+        ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getEmptiestServer(forced);
+        if (extendedServerInfo == null) {
+            return null;
         }
-        if (serverInfos.isEmpty() == false) {
-            int random = (int) (Math.random() * serverInfos.size());
-            serverInfo = serverInfos.get(random);
-        }
-        return serverInfo;
+        return extendedServerInfo.getServerInfo();
     }
 
     private ServerInfo getDefault(ProxiedPlayer player) {
-        ServerInfo server = null;
         String defaultServer = player.getPendingConnection().getListener().getDefaultServer();
-        ArrayList<ServerInfo> serverInfos = new ArrayList<>();
-        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
-            if (extendedServerInfo.getServerName().equalsIgnoreCase(defaultServer)) {
-                if (plugin.getProxy().getServers().get(extendedServerInfo.getServerInfo().getName()) == null) {
-                    continue;
-                }
-                if (player.getServer() != null) {
-                    ExtendedServerInfo extendedServerInfo1 = ExtendedServerInfo.getExtendedInfos().get(player.getServer().getInfo().getName());
-                    if (extendedServerInfo == extendedServerInfo1) {
-                        continue;
-                    }
-                }
-                if (extendedServerInfo.getFree() >= 1) {
-                    serverInfos.add(extendedServerInfo.getServerInfo());
-                }
-            }
+        ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getEmptiestServer(defaultServer);
+        if (extendedServerInfo == null) {
+            return null;
         }
-        if (serverInfos.isEmpty() == false) {
-            int random = (int) (Math.random() * serverInfos.size());
-            server = serverInfos.get(random);
-        }
-        return server;
+        return extendedServerInfo.getServerInfo();
     }
 
     private ServerInfo findNameIgnoreSame(ExtendedServerInfo extendedServerInfo) {
         ServerInfo serverInfo = null;
         String serverName = extendedServerInfo.getServerName();
         ArrayList<ServerInfo> serverInfos = new ArrayList<>();
-        for (ExtendedServerInfo extendedServerInfo1 : ExtendedServerInfo.getExtendedInfos().values()) {
+        for (ExtendedServerInfo extendedServerInfo1 : ExtendedServerInfo.getExtendedInfos(serverName)) {
             if (extendedServerInfo1 == extendedServerInfo) {
                 continue;
             }
             if (plugin.getProxy().getServers().get(extendedServerInfo1.getServerInfo().getName()) == null) {
                 continue;
             }
-            if (extendedServerInfo1.getServerName().equalsIgnoreCase(serverName)) {
-                if (extendedServerInfo1.getFree() >= 1) {
-                    serverInfos.add(extendedServerInfo1.getServerInfo());
-                }
+            if (extendedServerInfo1.getFree() >= 1) {
+                serverInfos.add(extendedServerInfo1.getServerInfo());
             }
         }
-        if (serverInfos.isEmpty() == false) {
-            int random = (int) (Math.random() * serverInfos.size());
-            serverInfo = serverInfos.get(random);
-        }
-        /*if (serverInfo != null) {
-            plugin.getLogger().info("Server Info: " + serverInfo.getName());
-        }*/
+        int random = (int) (Math.random() * serverInfos.size());
+        serverInfo = serverInfos.get(random);
         return serverInfo;
     }
 
@@ -137,7 +104,6 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
             } else {
                 serverInfo1 = getDefault(player);
             }
-            //plugin.getLogger().info("Extended = null");
         } else {
             if (plugin.getMainConfig().users_reconnectDefault == false) {
                 boolean reconnect = true;
@@ -181,26 +147,14 @@ public class DatabaseReconnectHandler extends AbstractReconnectHandler {
         GetStoredEvent event = new GetStoredEvent(proxiedPlayer);
         plugin.getProxy().getPluginManager().callEvent(event);
         String server = (String) userObject.get("server");
-        ArrayList<ServerInfo> serverInfos = new ArrayList<>();
-        for (ExtendedServerInfo extendedServerInfo : ExtendedServerInfo.getExtendedInfos().values()) {
-            if (extendedServerInfo instanceof ManualESI) {
-                continue;
-            }
-            if (plugin.getProxy().getServers().get(extendedServerInfo.getServerInfo().getName()) == null) {
-                continue;
-            }
-            if (extendedServerInfo.getServerName().equalsIgnoreCase(server)) {
-                if (extendedServerInfo.getFree() >= 1) {
-                    serverInfos.add(extendedServerInfo.getServerInfo());
-                }
-            }
-        }
-        if (serverInfos.isEmpty()) {
+        ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getEmptiestServer(server);
+        if (extendedServerInfo == null) {
             return null;
         }
-        int random = (int) (Math.random() * serverInfos.size());
-        ServerInfo serverInfo = serverInfos.get(random);
-        //plugin.getLogger().info("Server Name: "+serverInfo.getName());
+        ServerInfo serverInfo = extendedServerInfo.getServerInfo();
+        if (extendedServerInfo instanceof ManualESI) {
+            serverInfo = getDefault(proxiedPlayer);
+        }
         return serverInfo;
     }
 

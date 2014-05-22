@@ -25,6 +25,20 @@ public class ExtendedServerInfo {
         return exSI;
     }
 
+    public static ExtendedServerInfo getEmptiestServer(String serverName) {
+        ArrayList<ExtendedServerInfo> servers = new ArrayList<>();
+        for (ExtendedServerInfo extendedServerInfo : getExtendedInfos(serverName)) {
+            if (extendedServerInfo.getFree() > 1) {
+                servers.add(extendedServerInfo);
+            }
+        }
+        if (servers.isEmpty()) {
+            return null;
+        }
+        int random = (int) (Math.random() * servers.size());
+        return servers.get(random);
+    }
+
     private final ServerInfo serverInfo;
     private final int maxPlayers;
     private final String serverName;
