@@ -49,14 +49,11 @@ public class PlayerListener implements Listener {
             }
         }
         ServerInfo newServer = ((DatabaseReconnectHandler)plugin.getProxy().getReconnectHandler()).getSimilarServer(event.getPlayer(), event.getPlayer().getServer().getInfo());
-        String message = "The server you were on unexpectedly disconnected.";
-        if (event.getKickReason().toLowerCase().contains("closed")) {
-            message = "The server you were on is restarting.";
-        }
+        //ServerInfo newServer = ((DatabaseReconnectHandler)plugin.getProxy().getReconnectHandler()).getServer(event.getPlayer());
         if (newServer != null) {
-            event.getPlayer().sendMessage(new TextComponent(message));
+            event.getPlayer().sendMessage(new TextComponent("The server you were on unexpectedly disconnected."));
         } else {
-            event.setKickReason(message);
+            event.setKickReason("The server you were on unexpectedly disconnected.");
             return;
         }
         event.setCancelled(true);
