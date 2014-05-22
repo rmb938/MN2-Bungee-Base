@@ -40,7 +40,7 @@ public class NetCommandHandlerBTB extends NetCommandHandler {
                     break;
                 case "galert":
                     String message = (String) objectHashMap.get("message");
-                    plugin.getProxy().broadcast(new TextComponent(ChatColor.GRAY + "[" + ChatColor.DARK_RED + "Global Alert" + ChatColor.GRAY + "]" + ChatColor.RED + message));
+                    plugin.getProxy().broadcast(new TextComponent(ChatColor.GRAY + "[" + ChatColor.DARK_RED + "Global Alert" + ChatColor.GRAY + "] " + ChatColor.RED + message));
                     break;
                 default:
                     break;
