@@ -51,15 +51,17 @@ public class CommandServer extends ExtendedCommand implements TabExecutor {
             for (ServerInfo server : servers.values()) {
                 if (server.canAccess(player)) {
                     extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(server.getName());
+                    if (extendedServerInfo != null) {
+                        id = extendedServerInfo.getServerId();
 
-                    id = extendedServerInfo.getServerId();
-
-                    TextComponent serverTextComponent = new TextComponent(first ? extendedServerInfo.getServerName()+"."+id : ", " + extendedServerInfo.getServerName()+"."+id);
-                    serverTextComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("IP: " + extendedServerInfo.getServerInfo().getAddress().getAddress()
-                            + " Port: " + extendedServerInfo.getServerInfo().getAddress().getPort()).create()));
-                    serverTextComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/server " + server.getName()));
-                    serverList.addExtra(serverTextComponent);
+                        TextComponent serverTextComponent = new TextComponent(first ? extendedServerInfo.getServerName() + "." + id : ", " + extendedServerInfo.getServerName() + "." + id);
+                        serverTextComponent.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("IP: " + extendedServerInfo.getServerInfo().getAddress().getAddress()
+                                + " Port: " + extendedServerInfo.getServerInfo().getAddress().getPort()).create()));
+                        serverTextComponent.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/server " + server.getName()));
+                        serverList.addExtra(serverTextComponent);
+                    }
                     first = false;
+
                 }
             }
             player.sendMessage(serverList);

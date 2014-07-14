@@ -53,7 +53,7 @@ public class PlayerListener implements Listener {
         if (newServer != null) {
             event.getPlayer().sendMessage(new TextComponent(event.getKickReason()));
         } else {
-            event.setKickReason(new TextComponent(event.getKickReason()));
+            event.setKickReason(event.getKickReason());
             return;
         }
         event.setCancelled(true);

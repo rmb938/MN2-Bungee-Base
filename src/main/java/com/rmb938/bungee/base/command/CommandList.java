@@ -5,6 +5,7 @@ import com.rmb938.bungee.base.entity.ExtendedServerInfo;
 import net.md_5.bungee.Util;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
@@ -35,9 +36,12 @@ public class CommandList extends ExtendedCommand {
                 Collections.sort(players, String.CASE_INSENSITIVE_ORDER);
 
                 ExtendedServerInfo extendedServerInfo = ExtendedServerInfo.getExtendedInfos().get(server.getName());
-
-                sender.sendMessage(plugin.getProxy().getTranslation("command_list", new Object[]{extendedServerInfo.getServerName()+"."+extendedServerInfo.getServerId(),
-                        extendedServerInfo.getCurrentPlayers(), Util.format(players, ChatColor.RESET + ", ")}));
+                if (extendedServerInfo != null) {
+                    sender.sendMessage(plugin.getProxy().getTranslation("command_list", new Object[]{extendedServerInfo.getServerName() + "." + extendedServerInfo.getServerId(),
+                            extendedServerInfo.getCurrentPlayers(), Util.format(players, ChatColor.RESET + ", ")}));
+                } else {
+                    sender.sendMessage(new TextComponent("Unknown server "+server.getName()));
+                }
             }
         }
         int online = 0;
