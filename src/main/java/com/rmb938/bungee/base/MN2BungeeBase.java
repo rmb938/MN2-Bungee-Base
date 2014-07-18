@@ -205,16 +205,21 @@ public class MN2BungeeBase extends Plugin {
     }
 
     private void sendHeartbeat() {
-        Jedis jedis = JedisManager.getJedis();
-        String data =  jedis.get(publicIP + ":bungee");
         try {
-            JSONObject jsonObject = new JSONObject(data);
-            jsonObject.put("currentPlayers", getProxy().getPlayers().size());
-            jedis.set(publicIP+":bungee", jsonObject.toString());
-            jedis.expire(publicIP+":bungee", 60);
-        } catch (JSONException e) {
-            e.printStackTrace();
+            Jedis jedis = JedisManager.getJedis();
+            String data = jedis.get(publicIP + ":bungee");
+            try {
+                JSONObject jsonObject = new JSONObject(data);
+                jsonObject.put("currentPlayers", getProxy().getPlayers().size());
+                jedis.set(publicIP + ":bungee", jsonObject.toString());
+                jedis.expire(publicIP + ":bungee", 60);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            JedisManager.returnJedis(jedis);
+        } catch (Exception ex) {
+            JedisManager.connectToRedis(mainConfig.redis_address);
         }
-        JedisManager.returnJedis(jedis);
+
     }
 }
